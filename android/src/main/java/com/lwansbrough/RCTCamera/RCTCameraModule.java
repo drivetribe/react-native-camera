@@ -44,38 +44,37 @@ import java.util.Map;
 
 import javax.annotation.Nullable;
 
-public class RCTCameraModule extends ReactContextBaseJavaModule
-    implements MediaRecorder.OnInfoListener, LifecycleEventListener {
+class RCTCameraModule extends ReactContextBaseJavaModule
+        implements MediaRecorder.OnInfoListener, LifecycleEventListener {
     private static final String TAG = "RCTCameraModule";
 
-    public static final int RCT_CAMERA_ASPECT_FILL = 0;
-    public static final int RCT_CAMERA_ASPECT_FIT = 1;
-    public static final int RCT_CAMERA_ASPECT_STRETCH = 2;
-    public static final int RCT_CAMERA_CAPTURE_MODE_STILL = 0;
-    public static final int RCT_CAMERA_CAPTURE_MODE_VIDEO = 1;
-    public static final int RCT_CAMERA_CAPTURE_TARGET_DISK = 0;
-    public static final int RCT_CAMERA_CAPTURE_TARGET_CAMERA_ROLL = 1;
-    public static final int RCT_CAMERA_CAPTURE_TARGET_TEMP = 2;
-    public static final int RCT_CAMERA_ORIENTATION_AUTO = Integer.MAX_VALUE;
-    public static final int RCT_CAMERA_ORIENTATION_PORTRAIT = Surface.ROTATION_0;
-    public static final int RCT_CAMERA_ORIENTATION_PORTRAIT_UPSIDE_DOWN = Surface.ROTATION_180;
-    public static final int RCT_CAMERA_ORIENTATION_LANDSCAPE_LEFT = Surface.ROTATION_90;
-    public static final int RCT_CAMERA_ORIENTATION_LANDSCAPE_RIGHT = Surface.ROTATION_270;
-    public static final int RCT_CAMERA_TYPE_FRONT = 1;
-    public static final int RCT_CAMERA_TYPE_BACK = 2;
-    public static final int RCT_CAMERA_FLASH_MODE_OFF = 0;
-    public static final int RCT_CAMERA_FLASH_MODE_ON = 1;
-    public static final int RCT_CAMERA_FLASH_MODE_AUTO = 2;
-    public static final int RCT_CAMERA_TORCH_MODE_OFF = 0;
-    public static final int RCT_CAMERA_TORCH_MODE_ON = 1;
-    public static final int RCT_CAMERA_TORCH_MODE_AUTO = 2;
-    public static final String RCT_CAMERA_CAPTURE_QUALITY_HIGH = "high";
-    public static final String RCT_CAMERA_CAPTURE_QUALITY_MEDIUM = "medium";
-    public static final String RCT_CAMERA_CAPTURE_QUALITY_LOW = "low";
-    public static final int MEDIA_TYPE_IMAGE = 1;
-    public static final int MEDIA_TYPE_VIDEO = 2;
+    static final int RCT_CAMERA_ASPECT_FILL = 0;
+    static final int RCT_CAMERA_ASPECT_FIT = 1;
+    private static final int RCT_CAMERA_ASPECT_STRETCH = 2;
+    private static final int RCT_CAMERA_CAPTURE_MODE_STILL = 0;
+    private static final int RCT_CAMERA_CAPTURE_MODE_VIDEO = 1;
+    private static final int RCT_CAMERA_CAPTURE_TARGET_DISK = 0;
+    private static final int RCT_CAMERA_CAPTURE_TARGET_CAMERA_ROLL = 1;
+    private static final int RCT_CAMERA_CAPTURE_TARGET_TEMP = 2;
+    private static final int RCT_CAMERA_ORIENTATION_AUTO = Integer.MAX_VALUE;
+    private static final int RCT_CAMERA_ORIENTATION_PORTRAIT = Surface.ROTATION_0;
+    private static final int RCT_CAMERA_ORIENTATION_PORTRAIT_UPSIDE_DOWN = Surface.ROTATION_180;
+    private static final int RCT_CAMERA_ORIENTATION_LANDSCAPE_LEFT = Surface.ROTATION_90;
+    private static final int RCT_CAMERA_ORIENTATION_LANDSCAPE_RIGHT = Surface.ROTATION_270;
+    static final int RCT_CAMERA_TYPE_FRONT = 1;
+    static final int RCT_CAMERA_TYPE_BACK = 2;
+    static final int RCT_CAMERA_FLASH_MODE_OFF = 0;
+    static final int RCT_CAMERA_FLASH_MODE_ON = 1;
+    static final int RCT_CAMERA_FLASH_MODE_AUTO = 2;
+    static final int RCT_CAMERA_TORCH_MODE_OFF = 0;
+    static final int RCT_CAMERA_TORCH_MODE_ON = 1;
+    private static final int RCT_CAMERA_TORCH_MODE_AUTO = 2;
+    static final String RCT_CAMERA_CAPTURE_QUALITY_HIGH = "high";
+    static final String RCT_CAMERA_CAPTURE_QUALITY_MEDIUM = "medium";
+    static final String RCT_CAMERA_CAPTURE_QUALITY_LOW = "low";
+    private static final int MEDIA_TYPE_IMAGE = 1;
+    private static final int MEDIA_TYPE_VIDEO = 2;
 
-    private static ReactApplicationContext _reactContext;
     private RCTSensorOrientationChecker _sensorOrientationChecker;
 
     private MediaRecorder mMediaRecorder = new MediaRecorder();
@@ -85,19 +84,15 @@ public class RCTCameraModule extends ReactContextBaseJavaModule
     private Promise mRecordingPromise = null;
     private ReadableMap mRecordingOptions;
 
-    public RCTCameraModule(ReactApplicationContext reactContext) {
+    RCTCameraModule(ReactApplicationContext reactContext) {
         super(reactContext);
-        _reactContext = reactContext;
-        _sensorOrientationChecker = new RCTSensorOrientationChecker(_reactContext);
-        _reactContext.addLifecycleEventListener(this);
+        _sensorOrientationChecker = new RCTSensorOrientationChecker(reactContext);
+        reactContext.addLifecycleEventListener(this);
     }
 
-    public static ReactApplicationContext getReactContextSingleton() {
-      return _reactContext;
-    }
-
+    @Override
     public void onInfo(MediaRecorder mr, int what, int extra) {
-        if ( what == MediaRecorder.MEDIA_RECORDER_INFO_MAX_DURATION_REACHED ||
+        if (what == MediaRecorder.MEDIA_RECORDER_INFO_MAX_DURATION_REACHED ||
                 what == MediaRecorder.MEDIA_RECORDER_INFO_MAX_FILESIZE_REACHED) {
             if (mRecordingPromise != null) {
                 releaseMediaRecorder(); // release the MediaRecorder object and resolve promise
@@ -208,8 +203,9 @@ public class RCTCameraModule extends ReactContextBaseJavaModule
         });
     }
 
-    private Throwable prepareMediaRecorder(ReadableMap options) {
-        CamcorderProfile cm = RCTCamera.getInstance().setCaptureVideoQuality(options.getInt("type"), options.getString("quality"));
+    private Throwable prepareMediaRecorder(ReadableMap options, int deviceOrientation) {
+        RCTCamera rctCamera = RCTCamera.getInstance();
+        CamcorderProfile cm = rctCamera.setCaptureVideoQuality(options.getInt("type"), options.getString("quality"));
 
         // Attach callback to handle maxDuration (@see onInfo method in this file)
         mMediaRecorder.setOnInfoListener(this);
@@ -221,7 +217,8 @@ public class RCTCameraModule extends ReactContextBaseJavaModule
         mMediaRecorder.setAudioSource(MediaRecorder.AudioSource.CAMCORDER);
         mMediaRecorder.setVideoSource(MediaRecorder.VideoSource.CAMERA);
 
-        mMediaRecorder.setOrientationHint(RCTCamera.getInstance().getAdjustedDeviceOrientation());
+        int orientationHint = rctCamera.getOrientationHint(options.getInt("type"), deviceOrientation);
+        mMediaRecorder.setOrientationHint(orientationHint);
 
         if (cm == null) {
             return new RuntimeException("CamcorderProfile not found in prepareMediaRecorder.");
@@ -271,7 +268,7 @@ public class RCTCameraModule extends ReactContextBaseJavaModule
         return null;
     }
 
-    private void record(final ReadableMap options, final Promise promise) {
+    private void record(final ReadableMap options, final Promise promise, int deviceOrientation) {
         if (mRecordingPromise != null) {
             return;
         }
@@ -282,7 +279,7 @@ public class RCTCameraModule extends ReactContextBaseJavaModule
             return;
         }
 
-        Throwable prepareError = prepareMediaRecorder(options);
+        Throwable prepareError = prepareMediaRecorder(options, deviceOrientation);
         if (prepareError != null) {
             promise.reject(prepareError);
             return;
@@ -290,7 +287,7 @@ public class RCTCameraModule extends ReactContextBaseJavaModule
 
         try {
             mMediaRecorder.start();
-            MRStartTime =  System.currentTimeMillis();
+            MRStartTime = System.currentTimeMillis();
             mRecordingOptions = options;
             mRecordingPromise = promise;  // only got here if mediaRecorder started
         } catch (Exception ex) {
@@ -305,7 +302,7 @@ public class RCTCameraModule extends ReactContextBaseJavaModule
         if (duration < 1500) {
             try {
                 Thread.sleep(1500 - duration);
-            } catch(InterruptedException ex) {
+            } catch (InterruptedException ex) {
                 Log.e(TAG, "releaseMediaRecorder thread sleep error.", ex);
             }
         }
@@ -356,7 +353,7 @@ public class RCTCameraModule extends ReactContextBaseJavaModule
                 }
 
                 values.put(MediaStore.Video.Media.MIME_TYPE, "video/mp4");
-                _reactContext.getContentResolver().insert(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, values);
+                getReactApplicationContext().getContentResolver().insert(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, values);
                 addToMediaStore(mVideoFile.getAbsolutePath());
                 response.putString("path", Uri.fromFile(mVideoFile).toString());
                 mRecordingPromise.resolve(response);
@@ -441,7 +438,7 @@ public class RCTCameraModule extends ReactContextBaseJavaModule
         }
 
         if (options.getInt("mode") == RCT_CAMERA_CAPTURE_MODE_VIDEO) {
-            record(options, promise);
+            record(options, promise, deviceOrientation);
             return;
         }
 
@@ -607,7 +604,7 @@ public class RCTCameraModule extends ReactContextBaseJavaModule
     private File getTempMediaFile(int type) {
         try {
             String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-            File outputDir = _reactContext.getCacheDir();
+            File outputDir = getReactApplicationContext().getCacheDir();
             File outputFile;
 
             if (type == MEDIA_TYPE_IMAGE) {
@@ -626,7 +623,7 @@ public class RCTCameraModule extends ReactContextBaseJavaModule
     }
 
     private void addToMediaStore(String path) {
-        MediaScannerConnection.scanFile(_reactContext, new String[] { path }, null, null);
+        MediaScannerConnection.scanFile(getReactApplicationContext(), new String[]{path}, null, null);
     }
 
 

@@ -13,73 +13,65 @@ import android.view.Surface;
 
 import com.facebook.react.bridge.ReactApplicationContext;
 
-interface RCTSensorOrientationListener {
-    void orientationEvent();
-}
+class RCTSensorOrientationChecker {
 
-public class RCTSensorOrientationChecker {
+    private final SensorManager mSensorManager;
+    private final SensorEventListener mSensorEventListener;
 
-    int mOrientation = 0;
-    private SensorEventListener mSensorEventListener;
-    private SensorManager mSensorManager;
     private RCTSensorOrientationListener mListener = null;
+    private int mOrientation = 0;
 
-    public RCTSensorOrientationChecker( ReactApplicationContext reactContext) {
-        mSensorEventListener = new Listener();
+    RCTSensorOrientationChecker(ReactApplicationContext reactContext) {
         mSensorManager = (SensorManager) reactContext.getSystemService(Context.SENSOR_SERVICE);
+        mSensorEventListener = new SensorEventListener() {
+            @Override
+            public void onSensorChanged(SensorEvent event) {
+                float x = event.values[0];
+                float y = event.values[1];
 
+                if (x < 5 && x > -5 && y > 5)
+                    mOrientation = Surface.ROTATION_0; // portrait
+                else if (x < -5 && y < 5 && y > -5)
+                    mOrientation = Surface.ROTATION_270; // right
+                else if (x < 5 && x > -5 && y < -5)
+                    mOrientation = Surface.ROTATION_180; // upside down
+                else if (x > 5 && y < 5 && y > -5)
+                    mOrientation = Surface.ROTATION_90; // left
+
+                if (mListener != null) {
+                    mListener.orientationEvent();
+                }
+            }
+
+            @Override
+            public void onAccuracyChanged(Sensor sensor, int accuracy) {
+            }
+        };
     }
 
     /**
      * Call on activity onResume()
      */
-    public void onResume() {
+    void onResume() {
         mSensorManager.registerListener(mSensorEventListener, mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_NORMAL);
     }
 
     /**
      * Call on activity onPause()
      */
-    public void onPause() {
+    void onPause() {
         mSensorManager.unregisterListener(mSensorEventListener);
     }
 
-    private class Listener implements SensorEventListener {
-
-        @Override
-        public void onSensorChanged(SensorEvent event) {
-            float x = event.values[0];
-            float y = event.values[1];
-
-            if (x<5 && x>-5 && y > 5)
-                mOrientation = Surface.ROTATION_0; // portrait
-            else if (x<-5 && y<5 && y>-5)
-                mOrientation = Surface.ROTATION_270; // right
-            else if (x<5 && x>-5 && y<-5)
-                mOrientation = Surface.ROTATION_180; // upside down
-            else if (x>5 && y<5 && y>-5)
-                mOrientation = Surface.ROTATION_90; // left
-
-            if (mListener != null) {
-                mListener.orientationEvent();
-            }
-        }
-
-        @Override
-        public void onAccuracyChanged(Sensor sensor, int accuracy) {
-
-        }
-    }
-
-    public int getOrientation() {
+    int getOrientation() {
         return mOrientation;
     }
 
-    public void registerOrientationListener(RCTSensorOrientationListener listener) {
+    void registerOrientationListener(RCTSensorOrientationListener listener) {
         this.mListener = listener;
     }
 
-    public void unregisterOrientationListener() {
+    void unregisterOrientationListener() {
         mListener = null;
     }
 }
