@@ -151,10 +151,9 @@ export default class Camera extends Component {
   }
 
   render() {
-    const style = [styles.base, this.props.style];
     const nativeProps = convertNativeProps(this.props);
 
-    return <RCTCamera ref={CAMERA_REF} {...nativeProps} />;
+    return <RCTCamera ref={CAMERA_REF} {...nativeProps} style={this.props.style} />;
   }
 
   capture(options) {
@@ -186,7 +185,7 @@ export default class Camera extends Component {
       this.setState({ isRecording: false });
       return CameraManager.stopCapture();
     }
-    return Promise.resolve("Not Recording.");
+    return Promise.reject("Not Recording");
   }
 
   getFOV() {
@@ -207,7 +206,3 @@ export default class Camera extends Component {
 export const constants = Camera.constants;
 
 const RCTCamera = requireNativeComponent('RCTCamera', Camera);
-
-const styles = StyleSheet.create({
-  base: {},
-});
