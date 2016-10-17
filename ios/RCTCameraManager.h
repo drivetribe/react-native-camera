@@ -22,10 +22,9 @@ typedef NS_ENUM(NSInteger, RCTCameraCaptureMode) {
 };
 
 typedef NS_ENUM(NSInteger, RCTCameraCaptureTarget) {
-  RCTCameraCaptureTargetMemory = 0,
-  RCTCameraCaptureTargetDisk = 1,
-  RCTCameraCaptureTargetTemp = 2,
-  RCTCameraCaptureTargetCameraRoll = 3
+  RCTCameraCaptureTargetDisk = 0,
+  RCTCameraCaptureTargetTemp = 1,
+  RCTCameraCaptureTargetCameraRoll = 2
 };
 
 typedef NS_ENUM(NSInteger, RCTCameraOrientation) {
