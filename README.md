@@ -145,7 +145,7 @@ The type of capture that will be performed by the camera - either a still image 
 
 #### `captureTarget`
 
-Values: `Camera.constants.CaptureTarget.cameraRoll` (ios only default), `Camera.constants.CaptureTarget.disk` (android default), `Camera.constants.CaptureTarget.temp`, ~~`Camera.constants.CaptureTarget.memory`~~ (deprecated),
+Values: `Camera.constants.CaptureTarget.cameraRoll` (ios only default), `Camera.constants.CaptureTarget.disk` (android default), `Camera.constants.CaptureTarget.temp`,
 
 This property allows you to specify the target output of the captured image data. By default the image binary is sent back as a base 64 encoded string. The disk output has been shown to improve capture response time, so that is the recommended value.
 
@@ -239,7 +239,6 @@ Supported options:
 
 The promise will be fulfilled with an object with some of the following properties:
 
- - `data`: Returns a base64-encoded string with the capture data (only returned with the deprecated `Camera.constants.CaptureTarget.memory`)
  - `path`: Returns the path of the captured image or video file on disk
  - `width`: (currently iOS video only) returns the video file's frame width
  - `height`: (currently iOS video only) returns the video file's frame height

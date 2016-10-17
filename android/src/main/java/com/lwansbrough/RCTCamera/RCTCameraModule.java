@@ -17,7 +17,6 @@ import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.Environment;
 import android.provider.MediaStore;
-import android.util.Base64;
 import android.util.Log;
 import android.view.Surface;
 
@@ -33,11 +32,9 @@ import com.facebook.react.bridge.WritableNativeMap;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.Collections;
 import java.util.Date;
@@ -56,10 +53,9 @@ public class RCTCameraModule extends ReactContextBaseJavaModule
     public static final int RCT_CAMERA_ASPECT_STRETCH = 2;
     public static final int RCT_CAMERA_CAPTURE_MODE_STILL = 0;
     public static final int RCT_CAMERA_CAPTURE_MODE_VIDEO = 1;
-    public static final int RCT_CAMERA_CAPTURE_TARGET_MEMORY = 0;
-    public static final int RCT_CAMERA_CAPTURE_TARGET_DISK = 1;
-    public static final int RCT_CAMERA_CAPTURE_TARGET_CAMERA_ROLL = 2;
-    public static final int RCT_CAMERA_CAPTURE_TARGET_TEMP = 3;
+    public static final int RCT_CAMERA_CAPTURE_TARGET_DISK = 0;
+    public static final int RCT_CAMERA_CAPTURE_TARGET_CAMERA_ROLL = 1;
+    public static final int RCT_CAMERA_CAPTURE_TARGET_TEMP = 2;
     public static final int RCT_CAMERA_ORIENTATION_AUTO = Integer.MAX_VALUE;
     public static final int RCT_CAMERA_ORIENTATION_PORTRAIT = Surface.ROTATION_0;
     public static final int RCT_CAMERA_ORIENTATION_PORTRAIT_UPSIDE_DOWN = Surface.ROTATION_180;
@@ -171,7 +167,6 @@ public class RCTCameraModule extends ReactContextBaseJavaModule
             private Map<String, Object> getCaptureTargetConstants() {
                 return Collections.unmodifiableMap(new HashMap<String, Object>() {
                     {
-                        put("memory", RCT_CAMERA_CAPTURE_TARGET_MEMORY);
                         put("disk", RCT_CAMERA_CAPTURE_TARGET_DISK);
                         put("cameraRoll", RCT_CAMERA_CAPTURE_TARGET_CAMERA_ROLL);
                         put("temp", RCT_CAMERA_CAPTURE_TARGET_TEMP);
@@ -237,9 +232,6 @@ public class RCTCameraModule extends ReactContextBaseJavaModule
 
         mVideoFile = null;
         switch (options.getInt("target")) {
-            case RCT_CAMERA_CAPTURE_TARGET_MEMORY:
-                mVideoFile = getTempMediaFile(MEDIA_TYPE_VIDEO); // temporarily
-                break;
             case RCT_CAMERA_CAPTURE_TARGET_CAMERA_ROLL:
                 mVideoFile = getOutputCameraRollFile(MEDIA_TYPE_VIDEO);
                 break;
@@ -346,12 +338,6 @@ public class RCTCameraModule extends ReactContextBaseJavaModule
 
         WritableMap response = new WritableNativeMap();
         switch (mRecordingOptions.getInt("target")) {
-            case RCT_CAMERA_CAPTURE_TARGET_MEMORY:
-                byte[] encoded = convertFileToByteArray(mVideoFile);
-                response.putString("data", new String(encoded, Base64.DEFAULT));
-                mRecordingPromise.resolve(response);
-                f.delete();
-                break;
             case RCT_CAMERA_CAPTURE_TARGET_CAMERA_ROLL:
                 ContentValues values = new ContentValues();
                 values.put(MediaStore.Video.Media.DATA, mVideoFile.getPath());
@@ -382,29 +368,6 @@ public class RCTCameraModule extends ReactContextBaseJavaModule
         }
 
         mRecordingPromise = null;
-    }
-
-    public static byte[] convertFileToByteArray(File f)
-    {
-        byte[] byteArray = null;
-        try
-        {
-            InputStream inputStream = new FileInputStream(f);
-            ByteArrayOutputStream bos = new ByteArrayOutputStream();
-            byte[] b = new byte[1024*8];
-            int bytesRead;
-
-            while ((bytesRead = inputStream.read(b)) != -1) {
-                bos.write(b, 0, bytesRead);
-            }
-
-            byteArray = bos.toByteArray();
-        }
-        catch (IOException e)
-        {
-            e.printStackTrace();
-        }
-        return byteArray;
     }
 
     private byte[] mirrorImage(byte[] data) {
@@ -511,11 +474,6 @@ public class RCTCameraModule extends ReactContextBaseJavaModule
                 camera.startPreview();
                 WritableMap response = new WritableNativeMap();
                 switch (options.getInt("target")) {
-                    case RCT_CAMERA_CAPTURE_TARGET_MEMORY:
-                        String encoded = Base64.encodeToString(data, Base64.DEFAULT);
-                        response.putString("data", encoded);
-                        promise.resolve(response);
-                        break;
                     case RCT_CAMERA_CAPTURE_TARGET_CAMERA_ROLL: {
                         File cameraRollFile = getOutputCameraRollFile(MEDIA_TYPE_IMAGE);
                         if (cameraRollFile == null) {

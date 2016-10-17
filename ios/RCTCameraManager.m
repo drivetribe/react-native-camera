@@ -68,7 +68,6 @@ RCT_EXPORT_MODULE();
                @"AVCaptureSessionPresetPhoto": @(RCTCameraCaptureSessionPresetPhoto)
                },
            @"CaptureTarget": @{
-               @"memory": @(RCTCameraCaptureTargetMemory),
                @"disk": @(RCTCameraCaptureTargetDisk),
                @"temp": @(RCTCameraCaptureTargetTemp),
                @"cameraRoll": @(RCTCameraCaptureTargetCameraRoll)
@@ -596,12 +595,7 @@ RCT_EXPORT_METHOD(hasFlash:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRej
 - (void)saveImage:(NSData*)imageData target:(NSInteger)target metadata:(NSDictionary *)metadata resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject {
   NSString *responseString;
 
-  if (target == RCTCameraCaptureTargetMemory) {
-    resolve(@{@"data":[imageData base64EncodedStringWithOptions:0]});
-    return;
-  }
-
-  else if (target == RCTCameraCaptureTargetDisk) {
+  if (target == RCTCameraCaptureTargetDisk) {
     NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
     NSString *documentsDirectory = [paths firstObject];
 
