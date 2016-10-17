@@ -1,13 +1,8 @@
 package com.lwansbrough.RCTCamera;
 
-import android.support.annotation.Nullable;
-
-import com.facebook.react.bridge.ReadableArray;
-import com.facebook.react.uimanager.*;
+import com.facebook.react.uimanager.ThemedReactContext;
+import com.facebook.react.uimanager.ViewGroupManager;
 import com.facebook.react.uimanager.annotations.ReactProp;
-
-import java.util.List;
-import java.util.ArrayList;
 
 public class RCTCameraViewManager extends ViewGroupManager<RCTCameraView> {
     private static final String REACT_CLASS = "RCTCamera";
@@ -67,20 +62,4 @@ public class RCTCameraViewManager extends ViewGroupManager<RCTCameraView> {
         // TODO - implement video mode
     }
 
-    @ReactProp(name = "barcodeScannerEnabled")
-    public void setBarcodeScannerEnabled(RCTCameraView view, boolean barcodeScannerEnabled) {
-        view.setBarcodeScannerEnabled(barcodeScannerEnabled);
-    }
-
-    @ReactProp(name = "barCodeTypes")
-    public void setBarCodeTypes(RCTCameraView view, ReadableArray barCodeTypes) {
-        if (barCodeTypes == null) {
-            return;
-        }
-        List<String> result = new ArrayList<String>(barCodeTypes.size());
-        for (int i = 0; i < barCodeTypes.size(); i++) {
-            result.add(barCodeTypes.getString(i));
-        }
-        view.setBarCodeTypes(result);
-    }
 }

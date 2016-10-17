@@ -7,11 +7,9 @@ package com.lwansbrough.RCTCamera;
 import android.content.Context;
 import android.hardware.SensorManager;
 import android.view.OrientationEventListener;
+import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
-import android.view.View;
-
-import java.util.List;
 
 public class RCTCameraView extends ViewGroup {
     private final OrientationEventListener _orientationListener;
@@ -105,14 +103,6 @@ public class RCTCameraView extends ViewGroup {
         if (this._viewFinder != null) {
             layoutViewFinder();
         }
-    }
-
-    public void setBarcodeScannerEnabled(boolean barcodeScannerEnabled) {
-        RCTCamera.getInstance().setBarcodeScannerEnabled(barcodeScannerEnabled);
-    }
-
-    public void setBarCodeTypes(List<String> types) {
-        RCTCamera.getInstance().setBarCodeTypes(types);
     }
 
     private boolean setActualDeviceOrientation(Context context) {
