@@ -42,13 +42,6 @@ function convertNativeProps(props) {
     newProps.captureMode = Camera.constants.CaptureMode[props.captureMode];
   }
 
-  // do not register barCodeTypes if no barcode listener
-  if (typeof props.onBarCodeRead !== 'function') {
-    newProps.barCodeTypes = [];
-  }
-
-  newProps.barcodeScannerEnabled = typeof props.onBarCodeRead === 'function'
-
   return newProps;
 }
 
@@ -56,7 +49,6 @@ export default class Camera extends Component {
 
   static constants = {
     Aspect: CameraManager.Aspect,
-    BarCodeType: CameraManager.BarCodeType,
     Type: CameraManager.Type,
     CaptureMode: CameraManager.CaptureMode,
     CaptureTarget: CameraManager.CaptureTarget,
@@ -91,12 +83,9 @@ export default class Camera extends Component {
       PropTypes.number
     ]),
     keepAwake: PropTypes.bool,
-    onBarCodeRead: PropTypes.func,
-    barcodeScannerEnabled: PropTypes.bool,
     onFocusChanged: PropTypes.func,
     onZoomChanged: PropTypes.func,
     mirrorImage: PropTypes.bool,
-    barCodeTypes: PropTypes.array,
     orientation: PropTypes.oneOfType([
       PropTypes.string,
       PropTypes.number
@@ -125,7 +114,6 @@ export default class Camera extends Component {
     playSoundOnCapture: true,
     torchMode: CameraManager.TorchMode.off,
     mirrorImage: false,
-    barCodeTypes: Object.values(CameraManager.BarCodeType),
   };
 
   static checkDeviceAuthorizationStatus = CameraManager.checkDeviceAuthorizationStatus;
@@ -145,7 +133,6 @@ export default class Camera extends Component {
   }
 
   async componentWillMount() {
-    this._addOnBarCodeReadListener()
 
     let { captureMode } = convertNativeProps({ captureMode: this.props.captureMode })
     let hasVideoAndAudio = this.props.captureAudio && captureMode === Camera.constants.CaptureMode.video
@@ -158,34 +145,8 @@ export default class Camera extends Component {
   }
 
   componentWillUnmount() {
-    this._removeOnBarCodeReadListener()
-
     if (this.state.isRecording) {
       this.stopCapture();
-    }
-  }
-
-  componentWillReceiveProps(newProps) {
-    const { onBarCodeRead } = this.props
-    if (onBarCodeRead && !newProps.onBarCodeRead) {
-      this._addOnBarCodeReadListener(newProps)
-    }
-  }
-
-  _addOnBarCodeReadListener(props) {
-    const { onBarCodeRead } = props || this.props
-    this._removeOnBarCodeReadListener()
-    if (onBarCodeRead) {
-      this.cameraBarCodeReadListener = Platform.select({
-        ios: NativeAppEventEmitter.addListener('CameraBarCodeRead', this._onBarCodeRead),
-        android: DeviceEventEmitter.addListener('CameraBarCodeReadAndroid',  this._onBarCodeRead)
-      })
-    }
-  }
-  _removeOnBarCodeReadListener() {
-    const listener = this.cameraBarCodeReadListener
-    if (listener) {
-      listener.remove()
     }
   }
 
@@ -196,17 +157,10 @@ export default class Camera extends Component {
     return <RCTCamera ref={CAMERA_REF} {...nativeProps} />;
   }
 
-  _onBarCodeRead = (data) => {
-    if (this.props.onBarCodeRead) {
-      this.props.onBarCodeRead(data)
-    }
-  };
-
   capture(options) {
     const props = convertNativeProps(this.props);
     options = {
       audio: props.captureAudio,
-      barCodeTypes: props.barCodeTypes,
       mode: props.captureMode,
       playSoundOnCapture: props.playSoundOnCapture,
       target: props.captureTarget,

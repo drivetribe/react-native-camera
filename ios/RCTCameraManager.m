@@ -49,27 +49,6 @@ RCT_EXPORT_MODULE();
                @"fit": @(RCTCameraAspectFit),
                @"fill": @(RCTCameraAspectFill)
                },
-           @"BarCodeType": @{
-               @"upce": AVMetadataObjectTypeUPCECode,
-               @"code39": AVMetadataObjectTypeCode39Code,
-               @"code39mod43": AVMetadataObjectTypeCode39Mod43Code,
-               @"ean13": AVMetadataObjectTypeEAN13Code,
-               @"ean8":  AVMetadataObjectTypeEAN8Code,
-               @"code93": AVMetadataObjectTypeCode93Code,
-               @"code138": AVMetadataObjectTypeCode128Code,
-               @"pdf417": AVMetadataObjectTypePDF417Code,
-               @"qr": AVMetadataObjectTypeQRCode,
-               @"aztec": AVMetadataObjectTypeAztecCode
-               #ifdef AVMetadataObjectTypeInterleaved2of5Code
-               ,@"interleaved2of5": AVMetadataObjectTypeInterleaved2of5Code
-               # endif
-               #ifdef AVMetadataObjectTypeITF14Code
-               ,@"itf14": AVMetadataObjectTypeITF14Code
-               # endif
-               #ifdef AVMetadataObjectTypeDataMatrixCode
-               ,@"datamatrix": AVMetadataObjectTypeDataMatrixCode
-               # endif
-               },
            @"Type": @{
                @"front": @(RCTCameraTypeFront),
                @"back": @(RCTCameraTypeBack)
@@ -260,10 +239,6 @@ RCT_CUSTOM_VIEW_PROPERTY(mirrorImage, BOOL, RCTCamera) {
   self.mirrorImage = [RCTConvert BOOL:json];
 }
 
-RCT_CUSTOM_VIEW_PROPERTY(barCodeTypes, NSArray, RCTCamera) {
-  self.barCodeTypes = [RCTConvert NSArray:json];
-}
-
 RCT_CUSTOM_VIEW_PROPERTY(captureAudio, BOOL, RCTCamera) {
   BOOL captureAudio = [RCTConvert BOOL:json];
   if (captureAudio) {
@@ -416,7 +391,6 @@ RCT_EXPORT_METHOD(hasFlash:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRej
     if ([self.session canAddOutput:metadataOutput]) {
       [metadataOutput setMetadataObjectsDelegate:self queue:self.sessionQueue];
       [self.session addOutput:metadataOutput];
-      [metadataOutput setMetadataObjectTypes:self.barCodeTypes];
       self.metadataOutput = metadataOutput;
     }
 
@@ -841,36 +815,6 @@ didFinishRecordingToOutputFileAtURL:(NSURL *)outputFileURL
     self.videoReject(RCTErrorUnspecified, nil, RCTErrorWithMessage(@"Target not supported"));
   }
 }
-
-- (void)captureOutput:(AVCaptureOutput *)captureOutput didOutputMetadataObjects:(NSArray *)metadataObjects fromConnection:(AVCaptureConnection *)connection {
-
-  for (AVMetadataMachineReadableCodeObject *metadata in metadataObjects) {
-    for (id barcodeType in self.barCodeTypes) {
-      if ([metadata.type isEqualToString:barcodeType]) {
-        // Transform the meta-data coordinates to screen coords
-        AVMetadataMachineReadableCodeObject *transformed = (AVMetadataMachineReadableCodeObject *)[_previewLayer transformedMetadataObjectForMetadataObject:metadata];
-
-        NSDictionary *event = @{
-          @"type": metadata.type,
-          @"data": metadata.stringValue,
-          @"bounds": @{
-            @"origin": @{
-              @"x": [NSString stringWithFormat:@"%f", transformed.bounds.origin.x],
-              @"y": [NSString stringWithFormat:@"%f", transformed.bounds.origin.y]
-            },
-            @"size": @{
-              @"height": [NSString stringWithFormat:@"%f", transformed.bounds.size.height],
-              @"width": [NSString stringWithFormat:@"%f", transformed.bounds.size.width],
-            }
-          }
-        };
-
-        [self.bridge.eventDispatcher sendAppEventWithName:@"CameraBarCodeRead" body:event];
-      }
-    }
-  }
-}
-
 
 - (AVCaptureDevice *)deviceWithMediaType:(NSString *)mediaType preferringPosition:(AVCaptureDevicePosition)position
 {
