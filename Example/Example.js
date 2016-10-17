@@ -6,7 +6,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import Camera from 'react-native-camera';
+import Camera from '@drivetribe/react-native-camera';
 
 const styles = StyleSheet.create({
   container: {
