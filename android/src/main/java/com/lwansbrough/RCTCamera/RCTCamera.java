@@ -1,7 +1,3 @@
-/**
- * Created by Fabrice Armisen (farmisen@gmail.com) on 1/4/16.
- */
-
 package com.lwansbrough.RCTCamera;
 
 import android.hardware.Camera;

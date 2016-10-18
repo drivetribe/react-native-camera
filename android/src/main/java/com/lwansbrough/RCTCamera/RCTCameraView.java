@@ -1,9 +1,6 @@
-/**
- * Created by Fabrice Armisen (farmisen@gmail.com) on 1/3/16.
- */
-
 package com.lwansbrough.RCTCamera;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.hardware.SensorManager;
 import android.view.OrientationEventListener;
@@ -13,6 +10,7 @@ import android.view.WindowManager;
 
 import com.facebook.react.uimanager.ThemedReactContext;
 
+@SuppressLint("ViewConstructor")
 public class RCTCameraView extends ViewGroup {
 
     private final WindowManager windowManager;
