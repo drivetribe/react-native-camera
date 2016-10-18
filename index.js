@@ -1,3 +1,7 @@
+/*
+ * @flow
+ */
+
 import React, { Component, PropTypes } from 'react';
 import {
   DeviceEventEmitter, // android
@@ -10,7 +14,6 @@ import {
 } from 'react-native';
 
 const CameraManager = NativeModules.CameraManager || NativeModules.CameraModule;
-const CAMERA_REF = 'camera';
 
 function convertNativeProps(props) {
   const newProps = { ...props };
@@ -44,6 +47,11 @@ function convertNativeProps(props) {
 
   return newProps;
 }
+
+type State = {
+  isAuthorized: boolean,
+  isRecording: boolean,
+};
 
 export default class Camera extends Component {
 
@@ -116,31 +124,31 @@ export default class Camera extends Component {
     mirrorImage: false,
   };
 
+  state: State = {
+    isAuthorized: false,
+    isRecording: false
+  };
+
   static checkDeviceAuthorizationStatus = CameraManager.checkDeviceAuthorizationStatus;
   static checkVideoAuthorizationStatus = CameraManager.checkVideoAuthorizationStatus;
   static checkAudioAuthorizationStatus = CameraManager.checkAudioAuthorizationStatus;
 
-  setNativeProps(props) {
-    this.refs[CAMERA_REF].setNativeProps(props);
+  cameraRef: RCTCamera;
+
+  setNativeProps(props: Object) {
+    this.cameraRef.setNativeProps(props);
   }
 
-  constructor() {
-    super();
-    this.state = {
-      isAuthorized: false,
-      isRecording: false
-    };
-  }
-
-  async componentWillMount() {
+  componentWillMount() {
 
     let { captureMode } = convertNativeProps({ captureMode: this.props.captureMode })
     let hasVideoAndAudio = this.props.captureAudio && captureMode === Camera.constants.CaptureMode.video
     let check = hasVideoAndAudio ? Camera.checkDeviceAuthorizationStatus : Camera.checkVideoAuthorizationStatus;
 
     if (check) {
-      const isAuthorized = await check();
-      this.setState({ isAuthorized });
+      check().then((isAuthorized) => {
+        this.setState({ isAuthorized });
+      })
     }
   }
 
@@ -153,12 +161,12 @@ export default class Camera extends Component {
   render() {
     const nativeProps = convertNativeProps(this.props);
 
-    return <RCTCamera ref={CAMERA_REF} {...nativeProps} style={this.props.style} />;
+    return <RCTCamera ref={(ref) => { this.cameraRef = ref; }} {...nativeProps} style={this.props.style} />;
   }
 
-  capture(options) {
+  capture(options?: Object) {
     const props = convertNativeProps(this.props);
-    options = {
+    const newOptions = {
       audio: props.captureAudio,
       mode: props.captureMode,
       playSoundOnCapture: props.playSoundOnCapture,
@@ -171,13 +179,13 @@ export default class Camera extends Component {
       ...options
     };
 
-    if (options.mode === Camera.constants.CaptureMode.video) {
-      options.totalSeconds = (options.totalSeconds > -1 ? options.totalSeconds : -1);
-      options.preferredTimeScale = options.preferredTimeScale || 30;
+    if (newOptions.mode === Camera.constants.CaptureMode.video) {
+      newOptions.totalSeconds = (newOptions.totalSeconds > -1 ? newOptions.totalSeconds : -1);
+      newOptions.preferredTimeScale = newOptions.preferredTimeScale || 30;
       this.setState({ isRecording: true });
     }
 
-    return CameraManager.capture(options);
+    return CameraManager.capture(newOptions);
   }
 
   stopCapture() {
@@ -185,7 +193,7 @@ export default class Camera extends Component {
       this.setState({ isRecording: false });
       return CameraManager.stopCapture();
     }
-    return Promise.reject("Not Recording");
+    return Promise.reject('Not Recording');
   }
 
   getFOV() {

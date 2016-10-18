@@ -9,6 +9,9 @@
 # Ignore malformed json
 .*/node_modules/y18n/test/.*\.json
 
+# Ignore the website subdir
+<PROJECT_ROOT>/website/.*
+
 # Ignore BUCK generated dirs
 <PROJECT_ROOT>/\.buckd/
 
@@ -20,6 +23,8 @@
 .*/Libraries/react-native/React.js
 .*/Libraries/react-native/ReactNative.js
 .*/node_modules/jest-runtime/build/__tests__/.*
+
+<PROJECT_ROOT>/Example/.*
 
 [include]
 
