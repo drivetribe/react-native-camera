@@ -28,6 +28,7 @@ import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.bridge.WritableNativeMap;
+import com.facebook.react.module.annotations.ReactModule;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -44,6 +45,7 @@ import java.util.Map;
 
 import javax.annotation.Nullable;
 
+@ReactModule(name = "RCTCameraModule")
 class RCTCameraModule extends ReactContextBaseJavaModule
         implements MediaRecorder.OnInfoListener, LifecycleEventListener {
     private static final String TAG = "RCTCameraModule";
@@ -632,7 +634,7 @@ class RCTCameraModule extends ReactContextBaseJavaModule
      */
     @Override
     public void onHostResume() {
-        // ... do nothing
+        // do nothing
     }
 
     @Override
@@ -645,6 +647,6 @@ class RCTCameraModule extends ReactContextBaseJavaModule
 
     @Override
     public void onHostDestroy() {
-        // ... do nothing
+        // do nothing
     }
 }
