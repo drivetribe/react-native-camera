@@ -1,9 +1,6 @@
-/**
- * Created by Fabrice Armisen (farmisen@gmail.com) on 1/3/16.
- */
-
 package com.lwansbrough.RCTCamera;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.SurfaceTexture;
 import android.hardware.Camera;
@@ -11,7 +8,9 @@ import android.view.TextureView;
 
 import java.util.List;
 
+@SuppressLint("ViewConstructor")
 class RCTCameraViewFinder extends TextureView implements TextureView.SurfaceTextureListener {
+
     private int _cameraType;
     private SurfaceTexture _surfaceTexture;
     private boolean _isStarting;
@@ -95,7 +94,7 @@ class RCTCameraViewFinder extends TextureView implements TextureView.SurfaceText
             try {
                 _camera = RCTCamera.getInstance().acquireCameraInstance(_cameraType);
                 Camera.Parameters parameters = _camera.getParameters();
-                // set autofocus
+                // set auto focus
                 List<String> focusModes = parameters.getSupportedFocusModes();
                 if (focusModes.contains(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE)) {
                     parameters.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE);

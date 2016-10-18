@@ -1,8 +1,3 @@
-/**
- * Created by Fabrice Armisen (farmisen@gmail.com) on 1/4/16.
- * Android video recording support by Marc Johnson (me@marc.mn) 4/2016
- */
-
 package com.lwansbrough.RCTCamera;
 
 import android.content.ContentValues;
@@ -46,23 +41,23 @@ import java.util.Map;
 import javax.annotation.Nullable;
 
 @ReactModule(name = "RCTCameraModule")
-class RCTCameraModule extends ReactContextBaseJavaModule
-        implements MediaRecorder.OnInfoListener, LifecycleEventListener {
+class RCTCameraModule extends ReactContextBaseJavaModule implements MediaRecorder.OnInfoListener, LifecycleEventListener {
+
     private static final String TAG = "RCTCameraModule";
 
     static final int RCT_CAMERA_ASPECT_FILL = 0;
     static final int RCT_CAMERA_ASPECT_FIT = 1;
-    private static final int RCT_CAMERA_ASPECT_STRETCH = 2;
-    private static final int RCT_CAMERA_CAPTURE_MODE_STILL = 0;
-    private static final int RCT_CAMERA_CAPTURE_MODE_VIDEO = 1;
-    private static final int RCT_CAMERA_CAPTURE_TARGET_DISK = 0;
-    private static final int RCT_CAMERA_CAPTURE_TARGET_CAMERA_ROLL = 1;
-    private static final int RCT_CAMERA_CAPTURE_TARGET_TEMP = 2;
-    private static final int RCT_CAMERA_ORIENTATION_AUTO = Integer.MAX_VALUE;
-    private static final int RCT_CAMERA_ORIENTATION_PORTRAIT = Surface.ROTATION_0;
-    private static final int RCT_CAMERA_ORIENTATION_PORTRAIT_UPSIDE_DOWN = Surface.ROTATION_180;
-    private static final int RCT_CAMERA_ORIENTATION_LANDSCAPE_LEFT = Surface.ROTATION_90;
-    private static final int RCT_CAMERA_ORIENTATION_LANDSCAPE_RIGHT = Surface.ROTATION_270;
+    static final int RCT_CAMERA_ASPECT_STRETCH = 2;
+    static final int RCT_CAMERA_CAPTURE_MODE_STILL = 0;
+    static final int RCT_CAMERA_CAPTURE_MODE_VIDEO = 1;
+    static final int RCT_CAMERA_CAPTURE_TARGET_DISK = 0;
+    static final int RCT_CAMERA_CAPTURE_TARGET_CAMERA_ROLL = 1;
+    static final int RCT_CAMERA_CAPTURE_TARGET_TEMP = 2;
+    static final int RCT_CAMERA_ORIENTATION_AUTO = Integer.MAX_VALUE;
+    static final int RCT_CAMERA_ORIENTATION_PORTRAIT = Surface.ROTATION_0;
+    static final int RCT_CAMERA_ORIENTATION_PORTRAIT_UPSIDE_DOWN = Surface.ROTATION_180;
+    static final int RCT_CAMERA_ORIENTATION_LANDSCAPE_LEFT = Surface.ROTATION_90;
+    static final int RCT_CAMERA_ORIENTATION_LANDSCAPE_RIGHT = Surface.ROTATION_270;
     static final int RCT_CAMERA_TYPE_FRONT = 1;
     static final int RCT_CAMERA_TYPE_BACK = 2;
     static final int RCT_CAMERA_FLASH_MODE_OFF = 0;
@@ -70,16 +65,16 @@ class RCTCameraModule extends ReactContextBaseJavaModule
     static final int RCT_CAMERA_FLASH_MODE_AUTO = 2;
     static final int RCT_CAMERA_TORCH_MODE_OFF = 0;
     static final int RCT_CAMERA_TORCH_MODE_ON = 1;
-    private static final int RCT_CAMERA_TORCH_MODE_AUTO = 2;
+    static final int RCT_CAMERA_TORCH_MODE_AUTO = 2;
     static final String RCT_CAMERA_CAPTURE_QUALITY_HIGH = "high";
     static final String RCT_CAMERA_CAPTURE_QUALITY_MEDIUM = "medium";
     static final String RCT_CAMERA_CAPTURE_QUALITY_LOW = "low";
-    private static final int MEDIA_TYPE_IMAGE = 1;
-    private static final int MEDIA_TYPE_VIDEO = 2;
+    static final int MEDIA_TYPE_IMAGE = 1;
+    static final int MEDIA_TYPE_VIDEO = 2;
 
-    private RCTSensorOrientationChecker _sensorOrientationChecker;
+    private final RCTSensorOrientationChecker _sensorOrientationChecker;
+    private final MediaRecorder mMediaRecorder = new MediaRecorder();
 
-    private MediaRecorder mMediaRecorder = new MediaRecorder();
     private long MRStartTime;
     private File mVideoFile;
     private Camera mCamera = null;
@@ -435,7 +430,7 @@ class RCTCameraModule extends ReactContextBaseJavaModule
     private void captureWithOrientation(final ReadableMap options, final Promise promise, int deviceOrientation) {
         Camera camera = RCTCamera.getInstance().acquireCameraInstance(options.getInt("type"));
         if (null == camera) {
-            promise.reject("No camera found.");
+            promise.reject(new Exception("No camera found."));
             return;
         }
 
@@ -465,7 +460,7 @@ class RCTCameraModule extends ReactContextBaseJavaModule
                 if (shouldMirror) {
                     data = mirrorImage(data);
                     if (data == null) {
-                        promise.reject("Error mirroring image");
+                        promise.reject(new Exception("Error mirroring image"));
                     }
                 }
 
@@ -476,7 +471,7 @@ class RCTCameraModule extends ReactContextBaseJavaModule
                     case RCT_CAMERA_CAPTURE_TARGET_CAMERA_ROLL: {
                         File cameraRollFile = getOutputCameraRollFile(MEDIA_TYPE_IMAGE);
                         if (cameraRollFile == null) {
-                            promise.reject("Error creating media file.");
+                            promise.reject(new Exception("Error creating media file."));
                             return;
                         }
 
@@ -494,7 +489,7 @@ class RCTCameraModule extends ReactContextBaseJavaModule
                     case RCT_CAMERA_CAPTURE_TARGET_DISK: {
                         File pictureFile = getOutputMediaFile(MEDIA_TYPE_IMAGE);
                         if (pictureFile == null) {
-                            promise.reject("Error creating media file.");
+                            promise.reject(new Exception("Error creating media file."));
                             return;
                         }
 
@@ -512,7 +507,7 @@ class RCTCameraModule extends ReactContextBaseJavaModule
                     case RCT_CAMERA_CAPTURE_TARGET_TEMP: {
                         File tempFile = getTempMediaFile(MEDIA_TYPE_IMAGE);
                         if (tempFile == null) {
-                            promise.reject("Error creating media file.");
+                            promise.reject(new Exception("Error creating media file."));
                             return;
                         }
 
@@ -544,7 +539,7 @@ class RCTCameraModule extends ReactContextBaseJavaModule
     public void hasFlash(ReadableMap options, final Promise promise) {
         Camera camera = RCTCamera.getInstance().acquireCameraInstance(options.getInt("type"));
         if (null == camera) {
-            promise.reject("No camera found.");
+            promise.reject(new Exception("No camera found."));
             return;
         }
         List<String> flashModes = camera.getParameters().getSupportedFlashModes();
@@ -589,7 +584,7 @@ class RCTCameraModule extends ReactContextBaseJavaModule
         }
 
         // Create a media file name
-        String photoName = String.format("%s", new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date()));
+        String photoName = String.format("%s", SimpleDateFormat.getDateTimeInstance().format(new Date()));
 
         if (type == MEDIA_TYPE_IMAGE) {
             photoName = String.format("IMG_%s.jpg", photoName);
@@ -605,7 +600,7 @@ class RCTCameraModule extends ReactContextBaseJavaModule
 
     private File getTempMediaFile(int type) {
         try {
-            String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+            String timeStamp = SimpleDateFormat.getDateTimeInstance().format(new Date());
             File outputDir = getReactApplicationContext().getCacheDir();
             File outputFile;
 
