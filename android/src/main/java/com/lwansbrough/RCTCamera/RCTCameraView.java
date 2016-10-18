@@ -11,25 +11,29 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 
+import com.facebook.react.uimanager.ThemedReactContext;
+
 public class RCTCameraView extends ViewGroup {
+
+    private final WindowManager windowManager;
     private final OrientationEventListener _orientationListener;
-    private final Context _context;
+
     private RCTCameraViewFinder _viewFinder = null;
-    private int _actualDeviceOrientation = -1;
+    private int displayOrientation = -1;
     private int _aspect = RCTCameraModule.RCT_CAMERA_ASPECT_FIT;
-    private String _captureQuality = "high";
     private int _torchMode = -1;
     private int _flashMode = -1;
 
-    public RCTCameraView(Context context) {
-        super(context);
-        this._context = context;
-        RCTCamera.createInstance(getDeviceOrientation(context));
+    public RCTCameraView(ThemedReactContext themedReactContext) {
+        super(themedReactContext);
+        RCTCamera.getInstance();
+        Context appContext = themedReactContext.getApplicationContext();
+        this.windowManager = (WindowManager) appContext.getSystemService(Context.WINDOW_SERVICE);
 
-        _orientationListener = new OrientationEventListener(context, SensorManager.SENSOR_DELAY_NORMAL) {
+        _orientationListener = new OrientationEventListener(appContext, SensorManager.SENSOR_DELAY_NORMAL) {
             @Override
             public void onOrientationChanged(int orientation) {
-                if (setActualDeviceOrientation(_context)) {
+                if (setActualDeviceOrientation()) {
                     layoutViewFinder();
                 }
             }
@@ -50,10 +54,22 @@ public class RCTCameraView extends ViewGroup {
     @Override
     public void onViewAdded(View child) {
         if (this._viewFinder == child) return;
-        // remove and readd view to make sure it is in the back.
-        // @TODO figure out why there was a z order issue in the first place and fix accordingly.
+        // remove and read view to make sure it is in the back.
+        // TODO: figure out why there was a z order issue in the first place and fix accordingly.
         this.removeView(this._viewFinder);
         this.addView(this._viewFinder, 0);
+    }
+
+    @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        _orientationListener.enable();
+    }
+
+    @Override
+    protected void onDetachedFromWindow() {
+        _orientationListener.disable();
+        super.onDetachedFromWindow();
     }
 
     public void setAspect(int aspect) {
@@ -66,7 +82,7 @@ public class RCTCameraView extends ViewGroup {
             this._viewFinder.setCameraType(type);
             RCTCamera.getInstance().adjustPreviewLayout(type);
         } else {
-            _viewFinder = new RCTCameraViewFinder(_context, type);
+            _viewFinder = new RCTCameraViewFinder(getContext(), type);
             if (-1 != this._flashMode) {
                 _viewFinder.setFlashMode(this._flashMode);
             }
@@ -78,7 +94,6 @@ public class RCTCameraView extends ViewGroup {
     }
 
     public void setCaptureQuality(String captureQuality) {
-        this._captureQuality = captureQuality;
         if (this._viewFinder != null) {
             this._viewFinder.setCaptureQuality(captureQuality);
         }
@@ -105,19 +120,19 @@ public class RCTCameraView extends ViewGroup {
         }
     }
 
-    private boolean setActualDeviceOrientation(Context context) {
-        int actualDeviceOrientation = getDeviceOrientation(context);
-        if (_actualDeviceOrientation != actualDeviceOrientation) {
-            _actualDeviceOrientation = actualDeviceOrientation;
-            RCTCamera.getInstance().setActualDeviceOrientation(_actualDeviceOrientation);
+    private boolean setActualDeviceOrientation() {
+        int displayOrientation = getDisplayOrientation();
+        if (this.displayOrientation != displayOrientation) {
+            this.displayOrientation = displayOrientation;
+            RCTCamera.getInstance().setDisplayOrientation(displayOrientation);
             return true;
         } else {
             return false;
         }
     }
 
-    private int getDeviceOrientation(Context context) {
-        return ((WindowManager) context.getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay().getOrientation();
+    private int getDisplayOrientation() {
+        return windowManager.getDefaultDisplay().getRotation();
     }
 
     private void layoutViewFinder() {

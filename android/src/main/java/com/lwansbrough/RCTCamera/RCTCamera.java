@@ -12,22 +12,23 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class RCTCamera {
-    private static RCTCamera ourInstance;
+class RCTCamera {
+
+    private static RCTCamera instance;
+
     private final HashMap<Integer, CameraInfoWrapper> _cameraInfos;
     private final HashMap<Integer, Integer> _cameraTypeToIndex;
     private final Map<Number, Camera> _cameras;
+
     private int _orientation = -1;
-    private int _actualDeviceOrientation = 0;
-    private int _adjustedDeviceOrientation = 0;
+    private int _displayOrientation = 0;
 
-    public static RCTCamera getInstance() {
-        return ourInstance;
+    static RCTCamera getInstance() {
+        if (instance == null) {
+            instance = new RCTCamera();
+        }
+        return instance;
     }
-    public static void createInstance(int deviceOrientation) {
-        ourInstance = new RCTCamera(deviceOrientation);
-    }
-
 
     public Camera acquireCameraInstance(int type) {
         if (null == _cameras.get(type) && null != _cameraTypeToIndex.get(type)) {
@@ -121,6 +122,17 @@ public class RCTCamera {
         return params.getSupportedPreviewSizes();
     }
 
+    public int getOrientationHint(int type, int deviceOrientation) {
+        CameraInfoWrapper cameraInfo = _cameraInfos.get(type);
+        int orientation = cameraInfo.info.orientation;
+
+        if (type == RCTCameraModule.RCT_CAMERA_TYPE_FRONT) {
+            return  (orientation + deviceOrientation * 90) % 360;
+        } else {
+            return (orientation - deviceOrientation * 90 + 360) % 360;
+        }
+    }
+
     public int getOrientation() {
         return _orientation;
     }
@@ -134,20 +146,8 @@ public class RCTCamera {
         adjustPreviewLayout(RCTCameraModule.RCT_CAMERA_TYPE_BACK);
     }
 
-    public int getActualDeviceOrientation() {
-        return _actualDeviceOrientation;
-    }
-
-    public void setAdjustedDeviceOrientation(int orientation) {
-        _adjustedDeviceOrientation = orientation;
-    }
-
-    public int getAdjustedDeviceOrientation() {
-        return _adjustedDeviceOrientation;
-    }
-
-    public void setActualDeviceOrientation(int actualDeviceOrientation) {
-        _actualDeviceOrientation = actualDeviceOrientation;
+    public void setDisplayOrientation(int displayOrientation) {
+        this._displayOrientation = displayOrientation;
         adjustPreviewLayout(RCTCameraModule.RCT_CAMERA_TYPE_FRONT);
         adjustPreviewLayout(RCTCameraModule.RCT_CAMERA_TYPE_BACK);
     }
@@ -201,7 +201,7 @@ public class RCTCamera {
                 cm = CamcorderProfile.get(_cameraTypeToIndex.get(cameraType), CamcorderProfile.QUALITY_HIGH);
         }
 
-        if (cm == null){
+        if (cm == null) {
             return null;
         }
 
@@ -299,16 +299,15 @@ public class RCTCamera {
         int rotation;
         int orientation = cameraInfo.info.orientation;
         if (cameraInfo.info.facing == Camera.CameraInfo.CAMERA_FACING_FRONT) {
-            rotation = (orientation + _actualDeviceOrientation * 90) % 360;
-            displayRotation = (720 - orientation - _actualDeviceOrientation * 90) % 360;
+            rotation = (orientation + _displayOrientation * 90) % 360;
+            displayRotation = (720 - orientation - _displayOrientation * 90) % 360;
         } else {
-            rotation = (orientation - _actualDeviceOrientation * 90 + 360) % 360;
+            rotation = (orientation - _displayOrientation * 90 + 360) % 360;
             displayRotation = rotation;
         }
         cameraInfo.rotation = rotation;
         // TODO: take in account the _orientation prop
 
-        setAdjustedDeviceOrientation(rotation);
         camera.setDisplayOrientation(displayRotation);
 
         Camera.Parameters parameters = camera.getParameters();
@@ -336,12 +335,10 @@ public class RCTCamera {
         }
     }
 
-    private RCTCamera(int deviceOrientation) {
+    private RCTCamera() {
         _cameras = new HashMap<>();
         _cameraInfos = new HashMap<>();
         _cameraTypeToIndex = new HashMap<>();
-
-        _actualDeviceOrientation = deviceOrientation;
 
         // map camera types to camera indexes and collect cameras properties
         for (int i = 0; i < Camera.getNumberOfCameras(); i++) {
@@ -361,14 +358,4 @@ public class RCTCamera {
         }
     }
 
-    private class CameraInfoWrapper {
-        public final Camera.CameraInfo info;
-        public int rotation = 0;
-        public int previewWidth = -1;
-        public int previewHeight = -1;
-
-        public CameraInfoWrapper(Camera.CameraInfo info) {
-            this.info = info;
-        }
-    }
 }
