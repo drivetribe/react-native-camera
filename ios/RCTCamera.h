@@ -1,6 +1,7 @@
 #import <UIKit/UIKit.h>
 #import <AVFoundation/AVFoundation.h>
 #import "CameraFocusSquare.h"
+#import "RCTComponent.h"
 
 @class RCTCameraManager;
 
