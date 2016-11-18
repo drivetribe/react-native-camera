@@ -370,11 +370,6 @@ RCT_EXPORT_METHOD(hasFlash:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRej
 #if TARGET_IPHONE_SIMULATOR
   return;
 #endif
-
-  [[NSNotificationCenter defaultCenter] removeObserver:self
-                                                  name:AVCaptureSessionDidStartRunningNotification
-                                                object:nil];
-
   dispatch_async(self.sessionQueue, ^{
     if (self.presetCamera == AVCaptureDevicePositionUnspecified) {
       self.presetCamera = AVCaptureDevicePositionBack;
@@ -411,13 +406,12 @@ RCT_EXPORT_METHOD(hasFlash:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRej
       });
     }]];
 
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(sessionDidStartRunning:)
+                                                 name:AVCaptureSessionDidStartRunningNotification
+                                               object:nil];
     [self.session startRunning];
   });
-}
-
-RCT_EXPORT_VIEW_PROPERTY(onSessionDidStartRunning, RCTBubblingEventBlock);
-- (void)sessionDidStartRunning:(NSNotification *)notification {
-  self.camera.onSessionDidStartRunning(@{});
 }
 
 - (void)stopSession {
@@ -442,6 +436,11 @@ RCT_EXPORT_VIEW_PROPERTY(onSessionDidStartRunning, RCTBubblingEventBlock);
       [self.session removeOutput:output];
     }
   });
+}
+
+RCT_EXPORT_VIEW_PROPERTY(onSessionDidStartRunning, RCTBubblingEventBlock);
+- (void)sessionDidStartRunning:(NSNotification *)notification {
+  self.camera.onSessionDidStartRunning(@{});
 }
 
 - (void)initializeCaptureSessionInput:(NSString *)type {
