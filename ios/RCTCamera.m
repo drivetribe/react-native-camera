@@ -81,6 +81,13 @@
   return self;
 }
 
+- (void)setReactTag:(NSNumber *)reactTag {
+  if (reactTag == nil) {
+    return;
+  }
+  [super setReactTag:reactTag];
+}
+
 - (void)layoutSubviews
 {
   [super layoutSubviews];
