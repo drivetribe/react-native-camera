@@ -172,6 +172,10 @@ export default class Example extends React.Component {
     return icon;
   }
 
+  onSessionDidStartRunning = () => {
+    //Do something like remove overlays
+  }
+
   render() {
     return (
       <View style={styles.container}>
@@ -188,6 +192,7 @@ export default class Example extends React.Component {
           captureTarget={this.state.camera.captureTarget}
           type={this.state.camera.type}
           flashMode={this.state.camera.flashMode}
+          onSessionDidStartRunning={this.onSessionDidStartRunning}
           defaultTouchToFocus
           mirrorImage={false}
         />

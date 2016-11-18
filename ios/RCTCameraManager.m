@@ -21,6 +21,10 @@
 
 RCT_EXPORT_MODULE();
 
+- (void)dealloc {
+  [[NSNotificationCenter defaultCenter] removeObserver:self];
+}
+
 - (UIView *)viewWithProps:(__unused NSDictionary *)props
 {
     self.presetCamera = ((NSNumber *)props[@"type"]).integerValue;
@@ -366,6 +370,11 @@ RCT_EXPORT_METHOD(hasFlash:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRej
 #if TARGET_IPHONE_SIMULATOR
   return;
 #endif
+
+  [[NSNotificationCenter defaultCenter] removeObserver:self
+                                                  name:AVCaptureSessionDidStartRunningNotification
+                                                object:nil];
+
   dispatch_async(self.sessionQueue, ^{
     if (self.presetCamera == AVCaptureDevicePositionUnspecified) {
       self.presetCamera = AVCaptureDevicePositionBack;
@@ -406,10 +415,20 @@ RCT_EXPORT_METHOD(hasFlash:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRej
   });
 }
 
+RCT_EXPORT_VIEW_PROPERTY(onSessionDidStartRunning, RCTBubblingEventBlock);
+- (void)sessionDidStartRunning:(NSNotification *)notification {
+  self.camera.onSessionDidStartRunning(@{});
+}
+
 - (void)stopSession {
 #if TARGET_IPHONE_SIMULATOR
   return;
 #endif
+
+  [[NSNotificationCenter defaultCenter] removeObserver:self
+                                                  name:AVCaptureSessionDidStartRunningNotification
+                                                object:nil];
+
   dispatch_async(self.sessionQueue, ^{
     self.camera = nil;
     [self.previewLayer removeFromSuperlayer];
