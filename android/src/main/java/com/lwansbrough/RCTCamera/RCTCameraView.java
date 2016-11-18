@@ -91,6 +91,12 @@ public class RCTCameraView extends ViewGroup {
         }
     }
 
+    public void setCaptureMode(final int captureMode) {
+        if (this._viewFinder != null) {
+            this._viewFinder.setCaptureMode(captureMode);
+        }
+    }
+
     public void setCaptureQuality(String captureQuality) {
         if (this._viewFinder != null) {
             this._viewFinder.setCaptureQuality(captureQuality);
