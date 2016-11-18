@@ -94,6 +94,7 @@ export default class Camera extends Component {
     onFocusChanged: PropTypes.func,
     onZoomChanged: PropTypes.func,
     mirrorImage: PropTypes.bool,
+    onSessionDidStartRunning: PropTypes.func,
     orientation: PropTypes.oneOfType([
       PropTypes.string,
       PropTypes.number

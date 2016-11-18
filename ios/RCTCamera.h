@@ -6,6 +6,8 @@
 
 @interface RCTCamera : UIView
 
+@property (nonatomic, copy) RCTBubblingEventBlock onSessionDidStartRunning;
+
 - (id)initWithManager:(RCTCameraManager*)manager bridge:(RCTBridge *)bridge;
 
 @end
