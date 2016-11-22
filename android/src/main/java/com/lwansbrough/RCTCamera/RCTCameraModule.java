@@ -67,6 +67,7 @@ class RCTCameraModule extends ReactContextBaseJavaModule
     static final int RCT_CAMERA_TORCH_MODE_OFF = 0;
     static final int RCT_CAMERA_TORCH_MODE_ON = 1;
     static final int RCT_CAMERA_TORCH_MODE_AUTO = 2;
+    static final String RCT_CAMERA_CAPTURE_QUALITY_PREVIEW = "preview";
     static final String RCT_CAMERA_CAPTURE_QUALITY_HIGH = "high";
     static final String RCT_CAMERA_CAPTURE_QUALITY_MEDIUM = "medium";
     static final String RCT_CAMERA_CAPTURE_QUALITY_LOW = "low";
@@ -175,6 +176,7 @@ class RCTCameraModule extends ReactContextBaseJavaModule
                         put("medium", RCT_CAMERA_CAPTURE_QUALITY_MEDIUM);
                         put("high", RCT_CAMERA_CAPTURE_QUALITY_HIGH);
                         put("photo", RCT_CAMERA_CAPTURE_QUALITY_HIGH);
+                        put("preview", RCT_CAMERA_CAPTURE_QUALITY_PREVIEW);
                         put("480p", RCT_CAMERA_CAPTURE_QUALITY_480P);
                         put("720p", RCT_CAMERA_CAPTURE_QUALITY_720P);
                         put("1080p", RCT_CAMERA_CAPTURE_QUALITY_1080P);
