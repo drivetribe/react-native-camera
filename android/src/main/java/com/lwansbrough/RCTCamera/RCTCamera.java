@@ -31,7 +31,7 @@ class RCTCamera {
         return instance;
     }
 
-    public Camera acquireCameraInstance(int type) {
+    public synchronized Camera acquireCameraInstance(int type) {
         if (null == _cameras.get(type) && null != _cameraTypeToIndex.get(type)) {
             try {
                 Camera camera = Camera.open(_cameraTypeToIndex.get(type));
@@ -185,7 +185,7 @@ class RCTCamera {
     }
 
     public void setCaptureQuality(int cameraType, String captureQuality) {
-        Camera camera = _cameras.get(cameraType);
+        Camera camera = this.acquireCameraInstance(cameraType);
         if (camera == null) {
             return;
         }
@@ -225,7 +225,7 @@ class RCTCamera {
     }
 
     public CamcorderProfile setCaptureVideoQuality(int cameraType, String captureQuality) {
-        Camera camera = _cameras.get(cameraType);
+        Camera camera = this.acquireCameraInstance(cameraType);
         if (camera == null) {
             return null;
         }
@@ -273,7 +273,7 @@ class RCTCamera {
     }
 
     public void setTorchMode(int cameraType, int torchMode) {
-        Camera camera = _cameras.get(cameraType);
+        Camera camera = this.acquireCameraInstance(cameraType);
         if (null == camera) {
             return;
         }
@@ -297,7 +297,7 @@ class RCTCamera {
     }
 
     public void setFlashMode(int cameraType, int flashMode) {
-        Camera camera = _cameras.get(cameraType);
+        Camera camera = this.acquireCameraInstance(cameraType);
         if (null == camera) {
             return;
         }
