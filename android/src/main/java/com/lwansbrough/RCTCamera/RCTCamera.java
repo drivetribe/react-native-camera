@@ -31,6 +31,15 @@ class RCTCamera {
         return instance;
     }
 
+    static Camera.Parameters getParameters(Camera camera) {
+        try {
+            return camera != null ? camera.getParameters() : null;
+        } catch (RuntimeException e) {
+            // The camera has been released
+            return null;
+        }
+    }
+
     public synchronized Camera acquireCameraInstance(int type) {
         if (null == _cameras.get(type) && null != _cameraTypeToIndex.get(type)) {
             try {

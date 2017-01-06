@@ -101,7 +101,7 @@ class RCTCameraViewFinder extends TextureView implements TextureView.SurfaceText
             _isStarting = true;
             try {
                 _camera = RCTCamera.getInstance().acquireCameraInstance(_cameraType);
-                Camera.Parameters parameters = _camera.getParameters();
+                Camera.Parameters parameters = RCTCamera.getParameters(_camera);
                 // set auto focus
                 List<String> focusModes = parameters.getSupportedFocusModes();
                 if (focusModes.contains(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE)) {
@@ -160,23 +160,23 @@ class RCTCameraViewFinder extends TextureView implements TextureView.SurfaceText
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        // Get the pointer ID
-        Camera.Parameters params = _camera.getParameters();
-        int action = event.getAction();
-
-
-        if (event.getPointerCount() > 1) {
-            // handle multi-touch events
-            if (action == MotionEvent.ACTION_POINTER_DOWN) {
-                mFingerSpacing = getFingerSpacing(event);
-            } else if (action == MotionEvent.ACTION_MOVE && params.isZoomSupported()) {
-                _camera.cancelAutoFocus();
-                handleZoom(event, params);
-            }
-        } else {
-            // handle single touch events
-            if (action == MotionEvent.ACTION_UP) {
-                handleFocus(event, params);
+        Camera.Parameters params = RCTCamera.getParameters(_camera);
+        if (params != null) {
+            // Get the pointer ID
+            int action = event.getAction();
+            if (event.getPointerCount() > 1) {
+                // handle multi-touch events
+                if (action == MotionEvent.ACTION_POINTER_DOWN) {
+                    mFingerSpacing = getFingerSpacing(event);
+                } else if (action == MotionEvent.ACTION_MOVE && params.isZoomSupported()) {
+                    _camera.cancelAutoFocus();
+                    handleZoom(event, params);
+                }
+            } else {
+                // handle single touch events
+                if (action == MotionEvent.ACTION_UP) {
+                    handleFocus(event, params);
+                }
             }
         }
         return true;
@@ -218,7 +218,9 @@ class RCTCameraViewFinder extends TextureView implements TextureView.SurfaceText
         }
     }
 
-    /** Determine the space between the first two fingers */
+    /**
+     * Determine the space between the first two fingers
+     */
     private float getFingerSpacing(MotionEvent event) {
         float x = event.getX(0) - event.getX(1);
         float y = event.getY(0) - event.getY(1);
