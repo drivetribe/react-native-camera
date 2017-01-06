@@ -614,11 +614,17 @@ class RCTCameraModule extends ReactContextBaseJavaModule
     @ReactMethod
     public void hasFlash(ReadableMap options, final Promise promise) {
         Camera camera = RCTCamera.getInstance().acquireCameraInstance(options.getInt("type"));
-        if (null == camera) {
+        if (camera == null) {
             promise.reject(new Exception("No camera found."));
             return;
         }
-        List<String> flashModes = camera.getParameters().getSupportedFlashModes();
+        Camera.Parameters parameters = RCTCamera.getParameters(camera);
+        if (parameters == null) {
+            promise.reject(new Exception("Camera not initialized."));
+            return;
+        }
+
+        List<String> flashModes = parameters.getSupportedFlashModes();
         promise.resolve(null != flashModes && !flashModes.isEmpty());
     }
 
