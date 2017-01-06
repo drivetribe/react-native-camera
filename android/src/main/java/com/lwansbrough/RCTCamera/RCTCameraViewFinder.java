@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.SurfaceTexture;
 import android.hardware.Camera;
+import android.view.MotionEvent;
 import android.view.TextureView;
 
 import java.util.List;
@@ -12,10 +13,12 @@ import java.util.List;
 class RCTCameraViewFinder extends TextureView implements TextureView.SurfaceTextureListener {
 
     private int _cameraType;
+    private int _captureMode;
     private SurfaceTexture _surfaceTexture;
     private boolean _isStarting;
     private boolean _isStopping;
     private Camera _camera;
+    private float mFingerSpacing;
 
     public RCTCameraViewFinder(Context context, int type) {
         super(context);
@@ -64,6 +67,11 @@ class RCTCameraViewFinder extends TextureView implements TextureView.SurfaceText
         }).start();
     }
 
+    public void setCaptureMode(final int captureMode) {
+        RCTCamera.getInstance().setCaptureMode(_cameraType, captureMode);
+        this._captureMode = captureMode;
+    }
+
     public void setCaptureQuality(String captureQuality) {
         RCTCamera.getInstance().setCaptureQuality(_cameraType, captureQuality);
     }
@@ -101,8 +109,16 @@ class RCTCameraViewFinder extends TextureView implements TextureView.SurfaceText
                 }
                 // set picture size
                 // defaults to max available size
+                List<Camera.Size> supportedSizes;
+                if (_captureMode == RCTCameraModule.RCT_CAMERA_CAPTURE_MODE_STILL) {
+                    supportedSizes = parameters.getSupportedPictureSizes();
+                } else if (_captureMode == RCTCameraModule.RCT_CAMERA_CAPTURE_MODE_VIDEO) {
+                    supportedSizes = RCTCamera.getInstance().getSupportedVideoSizes(_camera);
+                } else {
+                    throw new RuntimeException("Unsupported capture mode:" + _captureMode);
+                }
                 Camera.Size optimalPictureSize = RCTCamera.getInstance().getBestSize(
-                        parameters.getSupportedPictureSizes(),
+                        supportedSizes,
                         Integer.MAX_VALUE,
                         Integer.MAX_VALUE
                 );
@@ -142,4 +158,70 @@ class RCTCameraViewFinder extends TextureView implements TextureView.SurfaceText
         }
     }
 
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        // Get the pointer ID
+        Camera.Parameters params = _camera.getParameters();
+        int action = event.getAction();
+
+
+        if (event.getPointerCount() > 1) {
+            // handle multi-touch events
+            if (action == MotionEvent.ACTION_POINTER_DOWN) {
+                mFingerSpacing = getFingerSpacing(event);
+            } else if (action == MotionEvent.ACTION_MOVE && params.isZoomSupported()) {
+                _camera.cancelAutoFocus();
+                handleZoom(event, params);
+            }
+        } else {
+            // handle single touch events
+            if (action == MotionEvent.ACTION_UP) {
+                handleFocus(event, params);
+            }
+        }
+        return true;
+    }
+
+    private void handleZoom(MotionEvent event, Camera.Parameters params) {
+        int maxZoom = params.getMaxZoom();
+        int zoom = params.getZoom();
+        float newDist = getFingerSpacing(event);
+        if (newDist > mFingerSpacing) {
+            //zoom in
+            if (zoom < maxZoom)
+                zoom++;
+        } else if (newDist < mFingerSpacing) {
+            //zoom out
+            if (zoom > 0)
+                zoom--;
+        }
+        mFingerSpacing = newDist;
+        params.setZoom(zoom);
+        _camera.setParameters(params);
+    }
+
+    public void handleFocus(MotionEvent event, Camera.Parameters params) {
+        int pointerId = event.getPointerId(0);
+        int pointerIndex = event.findPointerIndex(pointerId);
+        // Get the pointer's current position
+        float x = event.getX(pointerIndex);
+        float y = event.getY(pointerIndex);
+
+        List<String> supportedFocusModes = params.getSupportedFocusModes();
+        if (supportedFocusModes != null && supportedFocusModes.contains(Camera.Parameters.FOCUS_MODE_AUTO)) {
+            _camera.autoFocus(new Camera.AutoFocusCallback() {
+                @Override
+                public void onAutoFocus(boolean b, Camera camera) {
+                    // currently set to auto-focus on single touch
+                }
+            });
+        }
+    }
+
+    /** Determine the space between the first two fingers */
+    private float getFingerSpacing(MotionEvent event) {
+        float x = event.getX(0) - event.getX(1);
+        float y = event.getY(0) - event.getY(1);
+        return (float) Math.sqrt(x * x + y * y);
+    }
 }
