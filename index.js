@@ -135,7 +135,7 @@ export default class Camera extends Component {
   static checkVideoAuthorizationStatus = CameraManager.checkVideoAuthorizationStatus;
   static checkAudioAuthorizationStatus = CameraManager.checkAudioAuthorizationStatus;
 
-  cameraRef: RCTCamera;
+  cameraRef: any;
 
   setNativeProps(props: Object) {
     this.cameraRef.setNativeProps(props);
