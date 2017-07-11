@@ -2,7 +2,8 @@
  * @flow
  */
 
-import React, { Component, PropTypes } from 'react';
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import {
   DeviceEventEmitter, // android
   NativeAppEventEmitter, // ios
@@ -11,7 +12,7 @@ import {
   StyleSheet,
   requireNativeComponent,
   View,
-  ViewPropTypes
+  ViewPropTypes,
 } from 'react-native';
 
 const CameraManager = NativeModules.CameraManager || NativeModules.CameraModule;
