@@ -55,7 +55,7 @@ type State = {
   isRecording: boolean,
 };
 
-export default class Camera extends Component {
+export default class Camera extends Component<*, State> {
 
   static constants = {
     Aspect: CameraManager.Aspect,
