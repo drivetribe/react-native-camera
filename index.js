@@ -196,6 +196,7 @@ export default class Camera extends Component<*, State> {
       this.setState({ isRecording: false });
       return CameraManager.stopCapture();
     }
+    // $FlowFixMe - Flow bug
     return Promise.reject('Not Recording');
   }
 
