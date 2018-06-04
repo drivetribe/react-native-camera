@@ -7,21 +7,13 @@ import android.graphics.Paint;
 import android.media.CamcorderProfile;
 import android.os.Build;
 import android.support.media.ExifInterface;
-import android.util.SparseArray;
 import android.view.ViewGroup;
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.ReactContext;
 import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.uimanager.UIManagerModule;
 import com.google.android.cameraview.CameraView;
-import com.google.android.gms.vision.barcode.Barcode;
-import com.google.android.gms.vision.face.Face;
-import com.google.android.gms.vision.text.TextBlock;
-import com.google.zxing.Result;
 import org.reactnative.camera.events.*;
-import org.reactnative.camera.utils.ImageDimensions;
-import org.reactnative.barcodedetector.RNBarcodeDetector;
-import org.reactnative.facedetector.RNFaceDetector;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -171,88 +163,6 @@ public class RNCameraViewHelper {
 
   public static void emitCameraReadyEvent(ViewGroup view) {
     CameraReadyEvent event = CameraReadyEvent.obtain(view.getId());
-    ReactContext reactContext = (ReactContext) view.getContext();
-    reactContext.getNativeModule(UIManagerModule.class).getEventDispatcher().dispatchEvent(event);
-  }
-
-  // Face detection events
-
-  public static void emitFacesDetectedEvent(
-      ViewGroup view,
-      SparseArray<Face> faces,
-      ImageDimensions dimensions
-  ) {
-    float density = view.getResources().getDisplayMetrics().density;
-
-    double scaleX = (double) view.getWidth() / (dimensions.getWidth() * density);
-    double scaleY = (double) view.getHeight() / (dimensions.getHeight() * density);
-
-    FacesDetectedEvent event = FacesDetectedEvent.obtain(
-        view.getId(),
-        faces,
-        dimensions,
-        scaleX,
-        scaleY
-    );
-
-    ReactContext reactContext = (ReactContext) view.getContext();
-    reactContext.getNativeModule(UIManagerModule.class).getEventDispatcher().dispatchEvent(event);
-  }
-
-  public static void emitFaceDetectionErrorEvent(ViewGroup view, RNFaceDetector faceDetector) {
-    FaceDetectionErrorEvent event = FaceDetectionErrorEvent.obtain(view.getId(), faceDetector);
-    ReactContext reactContext = (ReactContext) view.getContext();
-    reactContext.getNativeModule(UIManagerModule.class).getEventDispatcher().dispatchEvent(event);
-  }
-
-  // Barcode detection events
-
-  public static void emitBarcodesDetectedEvent(
-      ViewGroup view,
-      SparseArray<Barcode> barcodes
-  ) {
-    BarcodesDetectedEvent event = BarcodesDetectedEvent.obtain(
-        view.getId(),
-        barcodes
-    );
-
-    ReactContext reactContext = (ReactContext) view.getContext();
-    reactContext.getNativeModule(UIManagerModule.class).getEventDispatcher().dispatchEvent(event);
-  }
-
-  public static void emitBarcodeDetectionErrorEvent(ViewGroup view, RNBarcodeDetector barcodeDetector) {
-    BarcodeDetectionErrorEvent event = BarcodeDetectionErrorEvent.obtain(view.getId(), barcodeDetector);
-    ReactContext reactContext = (ReactContext) view.getContext();
-    reactContext.getNativeModule(UIManagerModule.class).getEventDispatcher().dispatchEvent(event);
-  }
-
-  // Bar code read event
-
-  public static void emitBarCodeReadEvent(ViewGroup view, Result barCode) {
-    BarCodeReadEvent event = BarCodeReadEvent.obtain(view.getId(), barCode);
-    ReactContext reactContext = (ReactContext) view.getContext();
-    reactContext.getNativeModule(UIManagerModule.class).getEventDispatcher().dispatchEvent(event);
-  }
-
-  // Text recognition event
-
-  public static void emitTextRecognizedEvent(
-      ViewGroup view,
-      SparseArray<TextBlock> textBlocks,
-      ImageDimensions dimensions) {
-    float density = view.getResources().getDisplayMetrics().density;
-
-    double scaleX = (double) view.getWidth() / (dimensions.getWidth() * density);
-    double scaleY = (double) view.getHeight() / (dimensions.getHeight() * density);
-
-    TextRecognizedEvent event = TextRecognizedEvent.obtain(
-        view.getId(),
-        textBlocks,
-        dimensions,
-        scaleX,
-        scaleY
-    );
-
     ReactContext reactContext = (ReactContext) view.getContext();
     reactContext.getNativeModule(UIManagerModule.class).getEventDispatcher().dispatchEvent(event);
   }
