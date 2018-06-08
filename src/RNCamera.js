@@ -28,7 +28,7 @@ const styles = StyleSheet.create({
   },
 });
 
-type Orientation = "auto"|"landscapeLeft"|"landscapeRight"|"portrait"|"portraitUpsideDown";
+type Orientation = 'auto' | 'landscapeLeft' | 'landscapeRight' | 'portrait' | 'portraitUpsideDown';
 
 type PictureOptions = {
   quality?: number,
@@ -252,7 +252,7 @@ export default class Camera extends React.Component<PropsType, StateType> {
     }
   };
 
-  async componentWillMount() {
+  async componentDidMount() {
     const hasVideoAndAudio = this.props.captureAudio;
     const isAuthorized = await requestPermissions(
       hasVideoAndAudio,
