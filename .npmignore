@@ -1,3 +1,5 @@
-/Example
+/.github
+/docs
 issue_template.md
-/RNCameraExample
+circle.yml
+changelog.js
