@@ -14,8 +14,6 @@
 RCT_EXPORT_MODULE(RNCameraManager);
 RCT_EXPORT_VIEW_PROPERTY(onCameraReady, RCTDirectEventBlock);
 RCT_EXPORT_VIEW_PROPERTY(onMountError, RCTDirectEventBlock);
-RCT_EXPORT_VIEW_PROPERTY(onBarCodeRead, RCTDirectEventBlock);
-RCT_EXPORT_VIEW_PROPERTY(onFacesDetected, RCTDirectEventBlock);
 
 + (BOOL)requiresMainQueueSetup
 {
@@ -64,14 +62,12 @@ RCT_EXPORT_VIEW_PROPERTY(onFacesDetected, RCTDirectEventBlock);
                      @"portraitUpsideDown": @(RNCameraOrientationPortraitUpsideDown)
                      },
              @"VideoCodec": [[self class] validCodecTypes],
-             @"BarCodeType" : [[self class] validBarCodeTypes],
-             @"FaceDetection" : [[self  class] faceDetectorConstants]
              };
 }
 
 - (NSArray<NSString *> *)supportedEvents
 {
-    return @[@"onCameraReady", @"onMountError", @"onBarCodeRead", @"onFacesDetected"];
+    return @[@"onCameraReady", @"onMountError"];
 }
 
 + (NSDictionary *)validCodecTypes
@@ -160,38 +156,6 @@ RCT_CUSTOM_VIEW_PROPERTY(whiteBalance, NSInteger, RNCamera)
 {
     [view setWhiteBalance: [RCTConvert NSInteger:json]];
     [view updateWhiteBalance];
-}
-
-RCT_CUSTOM_VIEW_PROPERTY(faceDetectorEnabled, BOOL, RNCamera)
-{
-    [view updateFaceDetecting:json];
-}
-
-RCT_CUSTOM_VIEW_PROPERTY(faceDetectionMode, NSInteger, RNCamera)
-{
-    [view updateFaceDetectionMode:json];
-}
-
-RCT_CUSTOM_VIEW_PROPERTY(faceDetectionLandmarks, NSString, RNCamera)
-{
-    [view updateFaceDetectionLandmarks:json];
-}
-
-RCT_CUSTOM_VIEW_PROPERTY(faceDetectionClassifications, NSString, RNCamera)
-{
-    [view updateFaceDetectionClassifications:json];
-}
-
-RCT_CUSTOM_VIEW_PROPERTY(barCodeScannerEnabled, BOOL, RNCamera)
-{
-    
-    view.barCodeReading = [RCTConvert BOOL:json];
-    [view setupOrDisableBarcodeScanner];
-}
-
-RCT_CUSTOM_VIEW_PROPERTY(barCodeTypes, NSArray, RNCamera)
-{
-    [view setBarCodeTypes:[RCTConvert NSArray:json]];
 }
 
 RCT_REMAP_METHOD(takePicture,
