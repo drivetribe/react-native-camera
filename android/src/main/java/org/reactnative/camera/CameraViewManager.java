@@ -6,13 +6,15 @@ import com.facebook.react.uimanager.ThemedReactContext;
 import com.facebook.react.uimanager.ViewGroupManager;
 import com.facebook.react.uimanager.annotations.ReactProp;
 import com.google.android.cameraview.AspectRatio;
+import com.google.android.cameraview.Size;
 
 import java.util.Map;
 
 public class CameraViewManager extends ViewGroupManager<RNCameraView> {
   public enum Events {
     EVENT_CAMERA_READY("onCameraReady"),
-    EVENT_ON_MOUNT_ERROR("onMountError");
+    EVENT_ON_MOUNT_ERROR("onMountError"),
+    EVENT_ON_PICTURE_SAVED("onPictureSaved");
 
     private final String mName;
 
@@ -88,6 +90,11 @@ public class CameraViewManager extends ViewGroupManager<RNCameraView> {
   @ReactProp(name = "whiteBalance")
   public void setWhiteBalance(RNCameraView view, int whiteBalance) {
     view.setWhiteBalance(whiteBalance);
+  }
+    
+  @ReactProp(name = "pictureSize")
+  public void setPictureSize(RNCameraView view, String size) {
+    view.setPictureSize(size.equals("None") ? null : Size.parse(size));
   }
 
   @ReactProp(name = "useCamera2Api")

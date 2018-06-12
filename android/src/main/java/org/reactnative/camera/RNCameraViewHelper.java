@@ -8,12 +8,16 @@ import android.media.CamcorderProfile;
 import android.os.Build;
 import android.support.media.ExifInterface;
 import android.view.ViewGroup;
+
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.ReactContext;
 import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.uimanager.UIManagerModule;
 import com.google.android.cameraview.CameraView;
-import org.reactnative.camera.events.*;
+
+import org.reactnative.camera.events.CameraMountErrorEvent;
+import org.reactnative.camera.events.CameraReadyEvent;
+import org.reactnative.camera.events.PictureSavedEvent;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -163,6 +167,14 @@ public class RNCameraViewHelper {
 
   public static void emitCameraReadyEvent(ViewGroup view) {
     CameraReadyEvent event = CameraReadyEvent.obtain(view.getId());
+    ReactContext reactContext = (ReactContext) view.getContext();
+    reactContext.getNativeModule(UIManagerModule.class).getEventDispatcher().dispatchEvent(event);
+  }
+
+  // Picture saved event
+
+  public static void emitPictureSavedEvent(ViewGroup view, WritableMap response) {
+    PictureSavedEvent event = PictureSavedEvent.obtain(view.getId(), response);
     ReactContext reactContext = (ReactContext) view.getContext();
     reactContext.getNativeModule(UIManagerModule.class).getEventDispatcher().dispatchEvent(event);
   }

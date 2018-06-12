@@ -9,19 +9,27 @@ import android.media.MediaActionSound;
 import android.os.Build;
 import android.support.v4.content.ContextCompat;
 import android.view.View;
-import com.facebook.react.bridge.*;
+
+import com.facebook.react.bridge.Arguments;
+import com.facebook.react.bridge.LifecycleEventListener;
+import com.facebook.react.bridge.Promise;
+import com.facebook.react.bridge.ReadableMap;
+import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.uimanager.ThemedReactContext;
 import com.google.android.cameraview.CameraView;
-import org.reactnative.camera.tasks.*;
+
+import org.reactnative.camera.tasks.PictureSavedDelegate;
+import org.reactnative.camera.tasks.ResolveTakenPictureAsyncTask;
 import org.reactnative.camera.utils.RNFileUtils;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.*;
+import java.util.Map;
+import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-public class RNCameraView extends CameraView implements LifecycleEventListener {
+public class RNCameraView extends CameraView implements LifecycleEventListener, PictureSavedDelegate {
   private ThemedReactContext mThemedReactContext;
   private Queue<Promise> mPictureTakenPromises = new ConcurrentLinkedQueue<>();
   private Map<Promise, ReadableMap> mPictureTakenOptions = new ConcurrentHashMap<>();
@@ -52,8 +60,11 @@ public class RNCameraView extends CameraView implements LifecycleEventListener {
       public void onPictureTaken(CameraView cameraView, final byte[] data) {
         Promise promise = mPictureTakenPromises.poll();
         ReadableMap options = mPictureTakenOptions.remove(promise);
+        if (options.hasKey("fastMode") && options.getBoolean("fastMode")) {
+            promise.resolve(null);
+        }
         final File cacheDirectory = mPictureTakenDirectories.remove(promise);
-        new ResolveTakenPictureAsyncTask(data, promise, options, cacheDirectory).execute();
+        new ResolveTakenPictureAsyncTask(data, promise, options, cacheDirectory, RNCameraView.this).execute();
       }
 
       @Override
@@ -134,7 +145,19 @@ public class RNCameraView extends CameraView implements LifecycleEventListener {
       MediaActionSound sound = new MediaActionSound();
       sound.play(MediaActionSound.SHUTTER_CLICK);
     }
-    super.takePicture();
+    try {
+      super.takePicture();
+    } catch (Exception e) {
+      mPictureTakenPromises.remove(promise);
+      mPictureTakenOptions.remove(promise);
+      mPictureTakenDirectories.remove(promise);
+      throw e;
+    }
+  }
+        
+  @Override
+  public void onPictureSaved(WritableMap response) {
+    RNCameraViewHelper.emitPictureSavedEvent(this, response);
   }
 
   public void record(ReadableMap options, final Promise promise, File cacheDirectory) {
