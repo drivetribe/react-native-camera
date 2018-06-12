@@ -8,12 +8,16 @@ import android.media.CamcorderProfile;
 import android.os.Build;
 import android.support.media.ExifInterface;
 import android.view.ViewGroup;
+
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.ReactContext;
 import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.uimanager.UIManagerModule;
 import com.google.android.cameraview.CameraView;
-import org.reactnative.camera.events.*;
+
+import org.reactnative.camera.events.CameraMountErrorEvent;
+import org.reactnative.camera.events.CameraReadyEvent;
+import org.reactnative.camera.events.PictureSavedEvent;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;

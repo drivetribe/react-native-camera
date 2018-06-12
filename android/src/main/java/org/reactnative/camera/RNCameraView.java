@@ -9,15 +9,23 @@ import android.media.MediaActionSound;
 import android.os.Build;
 import android.support.v4.content.ContextCompat;
 import android.view.View;
-import com.facebook.react.bridge.*;
+
+import com.facebook.react.bridge.Arguments;
+import com.facebook.react.bridge.LifecycleEventListener;
+import com.facebook.react.bridge.Promise;
+import com.facebook.react.bridge.ReadableMap;
+import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.uimanager.ThemedReactContext;
 import com.google.android.cameraview.CameraView;
-import org.reactnative.camera.tasks.*;
+
+import org.reactnative.camera.tasks.PictureSavedDelegate;
+import org.reactnative.camera.tasks.ResolveTakenPictureAsyncTask;
 import org.reactnative.camera.utils.RNFileUtils;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.*;
+import java.util.Map;
+import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
@@ -70,64 +78,6 @@ public class RNCameraView extends CameraView implements LifecycleEventListener, 
             mVideoRecordedPromise.reject("E_RECORDING", "Couldn't stop recording - there is none in progress");
           }
           mVideoRecordedPromise = null;
-        }
-      }
-
-      private byte[] rotateImage(byte[] imageData, int height, int width) {
-        byte[] rotated = new byte[imageData.length];
-        for (int y = 0; y < width; y++) {
-          for (int x = 0; x < height; x++) {
-            int sourceIx = x + y * height;
-            int destIx = x * width + width - y - 1;
-            if (sourceIx >= 0 && sourceIx < imageData.length && destIx >= 0 && destIx < imageData.length) {
-              rotated[destIx] = imageData[sourceIx];
-            }
-          }
-        }
-        return rotated;
-      }
-
-      @Override
-      public void onFramePreview(CameraView cameraView, byte[] data, int width, int height, int rotation) {
-        int correctRotation = RNCameraViewHelper.getCorrectCameraRotation(rotation, getFacing());
-        int correctWidth = width;
-        int correctHeight = height;
-        byte[] correctData = data;
-        boolean willCallBarCodeTask = mShouldScanBarCodes && !barCodeScannerTaskLock && cameraView instanceof BarCodeScannerAsyncTaskDelegate;
-        boolean willCallFaceTask = mShouldDetectFaces && !faceDetectorTaskLock && cameraView instanceof FaceDetectorAsyncTaskDelegate;
-        boolean willCallGoogleBarcodeTask = mShouldGoogleDetectBarcodes && !googleBarcodeDetectorTaskLock && cameraView instanceof BarcodeDetectorAsyncTaskDelegate;
-        boolean willCallTextTask = mShouldRecognizeText && !textRecognizerTaskLock && cameraView instanceof TextRecognizerAsyncTaskDelegate;
-        if (!willCallBarCodeTask && !willCallFaceTask && !willCallGoogleBarcodeTask && !willCallTextTask) {
-          return;
-        }
-          
-        if (correctRotation == 90) {
-            correctWidth = height;
-            correctHeight = width;
-            correctData = rotateImage(data, correctHeight, correctWidth);
-        }
-        if (willCallBarCodeTask) {
-          barCodeScannerTaskLock = true;
-          BarCodeScannerAsyncTaskDelegate delegate = (BarCodeScannerAsyncTaskDelegate) cameraView;
-          new BarCodeScannerAsyncTask(delegate, mMultiFormatReader, correctData, correctWidth, correctHeight).execute();
-        }
-
-        if (willCallFaceTask) {
-          faceDetectorTaskLock = true;
-          FaceDetectorAsyncTaskDelegate delegate = (FaceDetectorAsyncTaskDelegate) cameraView;
-          new FaceDetectorAsyncTask(delegate, mFaceDetector, correctData, correctWidth, correctHeight, correctRotation).execute();
-        }
-
-        if (willCallGoogleBarcodeTask) {
-          googleBarcodeDetectorTaskLock = true;
-          BarcodeDetectorAsyncTaskDelegate delegate = (BarcodeDetectorAsyncTaskDelegate) cameraView;
-          new BarcodeDetectorAsyncTask(delegate, mGoogleBarcodeDetector, correctData, correctWidth, correctHeight, correctRotation).execute();
-        }
-
-        if (willCallTextTask) {
-          textRecognizerTaskLock = true;
-          TextRecognizerAsyncTaskDelegate delegate = (TextRecognizerAsyncTaskDelegate) cameraView;
-          new TextRecognizerAsyncTask(delegate, mTextRecognizer, correctData, correctWidth, correctHeight, correctRotation).execute();
         }
       }
     });
