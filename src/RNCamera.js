@@ -59,12 +59,15 @@ type PropsType = typeof View.props & {
   focusDepth?: number,
   type?: number | string,
   onCameraReady?: Function,
+  onPictureSaved?: Function,
   flashMode?: number | string,
   whiteBalance?: number | string,
   autoFocus?: string | boolean | number,
   captureAudio?: boolean,
   useCamera2Api?: boolean,
   playSoundOnCapture?: boolean,
+  videoStabilizationMode?: number | string,
+  pictureSize?: string,
 };
 
 type StateType = {
@@ -106,6 +109,7 @@ export default class Camera extends React.Component<PropsType, StateType> {
     VideoQuality: CameraManager.VideoQuality,
     VideoCodec: CameraManager.VideoCodec,
     CameraStatus,
+    VideoStabilization: CameraManager.VideoStabilization,
   };
 
   // Values under keys from this object will be transformed to native options
@@ -114,6 +118,7 @@ export default class Camera extends React.Component<PropsType, StateType> {
     flashMode: CameraManager.FlashMode,
     autoFocus: CameraManager.AutoFocus,
     whiteBalance: CameraManager.WhiteBalance,
+    videoStabilizationMode: CameraManager.VideoStabilization || {},
   };
 
   static propTypes = {
@@ -123,6 +128,7 @@ export default class Camera extends React.Component<PropsType, StateType> {
     focusDepth: PropTypes.number,
     onMountError: PropTypes.func,
     onCameraReady: PropTypes.func,
+    onPictureSaved: PropTypes.func,
     onTextRecognized: PropTypes.func,
     type: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
     flashMode: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
@@ -135,6 +141,8 @@ export default class Camera extends React.Component<PropsType, StateType> {
     captureAudio: PropTypes.bool,
     useCamera2Api: PropTypes.bool,
     playSoundOnCapture: PropTypes.bool,
+    videoStabilizationMode: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+    pictureSize: PropTypes.string,
   };
 
   static defaultProps: Object = {
@@ -160,6 +168,8 @@ export default class Camera extends React.Component<PropsType, StateType> {
     captureAudio: false,
     useCamera2Api: false,
     playSoundOnCapture: false,
+    pictureSize: 'None',
+    videoStabilizationMode: 0,
   };
 
   _cameraRef: ?Object;
@@ -198,6 +208,10 @@ export default class Camera extends React.Component<PropsType, StateType> {
     }
   }
 
+  getAvailablePictureSizes = async (): string[] => {
+    return await CameraManager.getAvailablePictureSizes(this.props.ratio, this._cameraHandle);
+  };
+
   async recordAsync(options?: RecordingOptions) {
     if (!options || typeof options !== 'object') {
       options = {};
@@ -211,6 +225,14 @@ export default class Camera extends React.Component<PropsType, StateType> {
     CameraManager.stopRecording(this._cameraHandle);
   }
 
+  pausePreview() {
+    CameraManager.pausePreview(this._cameraHandle);
+  }
+
+  resumePreview() {
+    CameraManager.resumePreview(this._cameraHandle);
+  }
+
   _onMountError = ({ nativeEvent }: EventCallbackArgumentsType) => {
     if (this.props.onMountError) {
       this.props.onMountError(nativeEvent);
@@ -220,6 +242,12 @@ export default class Camera extends React.Component<PropsType, StateType> {
   _onCameraReady = () => {
     if (this.props.onCameraReady) {
       this.props.onCameraReady();
+    }
+  };
+
+  _onPictureSaved = ({ nativeEvent }) => {
+    if (this.props.onPictureSaved) {
+      this.props.onPictureSaved(nativeEvent);
     }
   };
 
@@ -291,6 +319,7 @@ export default class Camera extends React.Component<PropsType, StateType> {
           ref={this._setReference}
           onMountError={this._onMountError}
           onCameraReady={this._onCameraReady}
+          onPictureSaved={this._onPictureSaved}
         >
           {this.renderChildren()}
         </RNCamera>
@@ -331,6 +360,7 @@ const RNCamera = requireNativeComponent('RNCamera', Camera, {
     accessibilityLiveRegion: true,
     importantForAccessibility: true,
     onCameraReady: true,
+    onPictureSaved: true,
     onLayout: true,
     onMountError: true,
     renderToHardwareTextureAndroid: true,
