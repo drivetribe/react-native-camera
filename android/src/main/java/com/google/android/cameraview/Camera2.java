@@ -308,7 +308,11 @@ class Camera2 extends CameraViewImpl implements MediaRecorder.OnInfoListener, Me
         }
 
         if (mMediaRecorder != null) {
-            mMediaRecorder.stop();
+            try {
+                mMediaRecorder.stop();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
             mMediaRecorder.reset();
             mMediaRecorder.release();
             mMediaRecorder = null;
