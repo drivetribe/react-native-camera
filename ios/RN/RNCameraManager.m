@@ -14,12 +14,7 @@
 RCT_EXPORT_MODULE(RNCameraManager);
 RCT_EXPORT_VIEW_PROPERTY(onCameraReady, RCTDirectEventBlock);
 RCT_EXPORT_VIEW_PROPERTY(onMountError, RCTDirectEventBlock);
-<<<<<<< HEAD
-=======
-RCT_EXPORT_VIEW_PROPERTY(onBarCodeRead, RCTDirectEventBlock);
-RCT_EXPORT_VIEW_PROPERTY(onFacesDetected, RCTDirectEventBlock);
 RCT_EXPORT_VIEW_PROPERTY(onPictureSaved, RCTDirectEventBlock);
->>>>>>> master
 
 + (BOOL)requiresMainQueueSetup
 {
