@@ -243,9 +243,12 @@ class Camera1 extends CameraViewImpl implements MediaRecorder.OnInfoListener,
     @Override
     void setPictureSize(Size size) {
         if (size == null) {
-            if (mAspectRatio == null) {
-                return;
-            }
+          if (mAspectRatio == null) {
+            return;
+          }
+          if (mPictureSizes.isEmpty()) {
+            return;
+          }
           mPictureSize = mPictureSizes.sizes(mAspectRatio).last();
         } else {
           mPictureSize = size;
