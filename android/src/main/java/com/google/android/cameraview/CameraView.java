@@ -84,16 +84,16 @@ public class CameraView extends FrameLayout {
 
     private final DisplayOrientationDetector mDisplayOrientationDetector;
 
-    public CameraView(Context context, boolean fallbackToOldApi) {
-        this(context, null, fallbackToOldApi);
+    public CameraView(Context context) {
+        this(context, null);
     }
 
-    public CameraView(Context context, AttributeSet attrs, boolean fallbackToOldApi) {
-        this(context, attrs, 0, fallbackToOldApi);
+    public CameraView(Context context, AttributeSet attrs) {
+        this(context, attrs, 0);
     }
 
     @SuppressWarnings("WrongConstant")
-    public CameraView(Context context, AttributeSet attrs, int defStyleAttr, boolean fallbackToOldApi) {
+    public CameraView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         if (isInEditMode()){
             mCallbacks = null;
@@ -106,7 +106,7 @@ public class CameraView extends FrameLayout {
         // Internal setup
         final PreviewImpl preview = createPreviewImpl(context);
         mCallbacks = new CallbackBridge();
-        if (fallbackToOldApi || Build.VERSION.SDK_INT < 21) {
+        if (Build.VERSION.SDK_INT < 21) {
             mImpl = new Camera1(mCallbacks, preview);
         } else if (Build.VERSION.SDK_INT < 23) {
             mImpl = new Camera2(mCallbacks, preview, context);

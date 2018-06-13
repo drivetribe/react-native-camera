@@ -41,7 +41,7 @@ public class RNCameraView extends CameraView implements LifecycleEventListener, 
   private boolean mIsNew = true;
 
   public RNCameraView(ThemedReactContext themedReactContext) {
-    super(themedReactContext, true);
+    super(themedReactContext);
     mThemedReactContext = themedReactContext;
     themedReactContext.addLifecycleEventListener(this);
 
