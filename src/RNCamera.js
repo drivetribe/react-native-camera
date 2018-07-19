@@ -16,6 +16,8 @@ import {
 
 import { requestPermissions } from './handlePermissions';
 
+import type { ViewStyleProp } from 'react-native/Libraries/StyleSheet/StyleSheet'
+
 const styles = StyleSheet.create({
   authorizationContainer: {
     flex: 1,
@@ -53,7 +55,7 @@ type EventCallbackArgumentsType = {
   nativeEvent: Object,
 };
 
-type PropsType = typeof View.props & {
+type PropsType = ViewStyleProp & {
   zoom?: number,
   ratio?: string,
   focusDepth?: number,
@@ -353,17 +355,4 @@ export default class Camera extends React.Component<PropsType, StateType> {
 
 export const Constants = Camera.Constants;
 
-const RNCamera = requireNativeComponent('RNCamera', Camera, {
-  nativeOnly: {
-    accessibilityComponentType: true,
-    accessibilityLabel: true,
-    accessibilityLiveRegion: true,
-    importantForAccessibility: true,
-    onCameraReady: true,
-    onPictureSaved: true,
-    onLayout: true,
-    onMountError: true,
-    renderToHardwareTextureAndroid: true,
-    testID: true,
-  },
-});
+const RNCamera = requireNativeComponent('RNCamera');
