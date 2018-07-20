@@ -5,7 +5,6 @@ import {
   findNodeHandle,
   Platform,
   NativeModules,
-  ViewPropTypes,
   requireNativeComponent,
   View,
   ActivityIndicator,
@@ -14,6 +13,8 @@ import {
 } from 'react-native';
 
 import { requestPermissions } from './handlePermissions';
+
+import type { ViewProps } from 'react-native/Libraries/Components/View/ViewPropTypes';
 
 const styles = StyleSheet.create({
   authorizationContainer: {
@@ -52,13 +53,14 @@ type EventCallbackArgumentsType = {
   nativeEvent: Object,
 };
 
-type PropsType = ViewPropTypes & {
+type PropsType = ViewProps & {
   zoom?: number,
   ratio?: string,
   focusDepth?: number,
   type?: number | string,
   onCameraReady?: Function,
   onPictureSaved?: Function,
+  onMountError?: Function,
   flashMode?: number | string,
   whiteBalance?: number | string,
   autoFocus?: string | boolean | number,
@@ -67,6 +69,10 @@ type PropsType = ViewPropTypes & {
   playSoundOnCapture?: boolean,
   videoStabilizationMode?: number | string,
   pictureSize?: string,
+  permissionDialogTitle?: string,
+  permissionDialogMessage?: string,
+  pendingAuthorizationView?: ?React$Element<any>,
+  notAuthorizedView?: ?React$Element<any>,
 };
 
 type StateType = {
@@ -278,10 +284,13 @@ export default class Camera extends React.Component<PropsType, StateType> {
   hasFaCC = (): * => typeof this.props.children === 'function';
 
   renderChildren = (): * => {
-    if (this.hasFaCC()) {
-      return this.props.children({ camera: this, status: this.getStatus() });
+    const { children } = this.props;
+    if (children) {
+      if (typeof children === 'function') {
+        return children({ camera: this, status: this.getStatus() });
+      }
+      return children;
     }
-    return this.props.children;
   };
 
   render() {
