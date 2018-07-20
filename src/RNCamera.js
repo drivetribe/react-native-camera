@@ -16,8 +16,6 @@ import {
 
 import { requestPermissions } from './handlePermissions';
 
-import type { ViewStyleProp } from 'react-native/Libraries/StyleSheet/StyleSheet'
-
 const styles = StyleSheet.create({
   authorizationContainer: {
     flex: 1,
@@ -55,7 +53,7 @@ type EventCallbackArgumentsType = {
   nativeEvent: Object,
 };
 
-type PropsType = ViewStyleProp & {
+type PropsType = ViewPropTypes & {
   zoom?: number,
   ratio?: string,
   focusDepth?: number,
