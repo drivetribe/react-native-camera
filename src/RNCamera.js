@@ -1,6 +1,5 @@
 // @flow
 import React from 'react';
-import PropTypes from 'prop-types';
 import { mapValues } from 'lodash';
 import {
   findNodeHandle,
@@ -53,7 +52,7 @@ type EventCallbackArgumentsType = {
   nativeEvent: Object,
 };
 
-type PropsType = typeof View.props & {
+type PropsType = ViewPropTypes & {
   zoom?: number,
   ratio?: string,
   focusDepth?: number,
@@ -119,30 +118,6 @@ export default class Camera extends React.Component<PropsType, StateType> {
     autoFocus: CameraManager.AutoFocus,
     whiteBalance: CameraManager.WhiteBalance,
     videoStabilizationMode: CameraManager.VideoStabilization || {},
-  };
-
-  static propTypes = {
-    ...ViewPropTypes,
-    zoom: PropTypes.number,
-    ratio: PropTypes.string,
-    focusDepth: PropTypes.number,
-    onMountError: PropTypes.func,
-    onCameraReady: PropTypes.func,
-    onPictureSaved: PropTypes.func,
-    onTextRecognized: PropTypes.func,
-    type: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-    flashMode: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-    whiteBalance: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-    autoFocus: PropTypes.oneOfType([PropTypes.string, PropTypes.number, PropTypes.bool]),
-    permissionDialogTitle: PropTypes.string,
-    permissionDialogMessage: PropTypes.string,
-    notAuthorizedView: PropTypes.element,
-    pendingAuthorizationView: PropTypes.element,
-    captureAudio: PropTypes.bool,
-    useCamera2Api: PropTypes.bool,
-    playSoundOnCapture: PropTypes.bool,
-    videoStabilizationMode: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-    pictureSize: PropTypes.string,
   };
 
   static defaultProps: Object = {
@@ -353,17 +328,4 @@ export default class Camera extends React.Component<PropsType, StateType> {
 
 export const Constants = Camera.Constants;
 
-const RNCamera = requireNativeComponent('RNCamera', Camera, {
-  nativeOnly: {
-    accessibilityComponentType: true,
-    accessibilityLabel: true,
-    accessibilityLiveRegion: true,
-    importantForAccessibility: true,
-    onCameraReady: true,
-    onPictureSaved: true,
-    onLayout: true,
-    onMountError: true,
-    renderToHardwareTextureAndroid: true,
-    testID: true,
-  },
-});
+const RNCamera = requireNativeComponent('RNCamera');
