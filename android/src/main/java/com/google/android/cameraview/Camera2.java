@@ -34,7 +34,6 @@ import android.media.CamcorderProfile;
 import android.media.Image;
 import android.media.ImageReader;
 import android.media.MediaRecorder;
-import android.support.annotation.NonNull;
 import android.util.Log;
 import android.util.SparseIntArray;
 import android.view.Surface;
@@ -48,6 +47,8 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.SortedSet;
+
+import androidx.annotation.NonNull;
 
 @SuppressWarnings("MissingPermission")
 @TargetApi(21)

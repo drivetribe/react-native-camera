@@ -6,7 +6,6 @@ import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import android.net.Uri;
 import android.os.AsyncTask;
-import android.support.media.ExifInterface;
 import android.util.Base64;
 
 import org.reactnative.camera.RNCameraViewHelper;
@@ -22,6 +21,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+
+import androidx.exifinterface.media.ExifInterface;
 
 public class ResolveTakenPictureAsyncTask extends AsyncTask<Void, Void, WritableMap> {
     private static final String ERROR_TAG = "E_TAKING_PICTURE_FAILED";

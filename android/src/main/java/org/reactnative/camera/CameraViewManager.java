@@ -1,6 +1,5 @@
 package org.reactnative.camera;
 
-import android.support.annotation.Nullable;
 import com.facebook.react.common.MapBuilder;
 import com.facebook.react.uimanager.ThemedReactContext;
 import com.facebook.react.uimanager.ViewGroupManager;
@@ -9,6 +8,8 @@ import com.google.android.cameraview.AspectRatio;
 import com.google.android.cameraview.Size;
 
 import java.util.Map;
+
+import androidx.annotation.Nullable;
 
 public class CameraViewManager extends ViewGroupManager<RNCameraView> {
   public enum Events {

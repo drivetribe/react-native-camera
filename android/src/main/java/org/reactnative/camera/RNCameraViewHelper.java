@@ -6,7 +6,6 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.media.CamcorderProfile;
 import android.os.Build;
-import android.support.media.ExifInterface;
 import android.view.ViewGroup;
 
 import com.facebook.react.bridge.Arguments;
@@ -21,6 +20,8 @@ import org.reactnative.camera.events.PictureSavedEvent;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+
+import androidx.exifinterface.media.ExifInterface;
 
 public class RNCameraViewHelper {
 
